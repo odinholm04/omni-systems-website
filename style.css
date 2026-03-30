@@ -12,8 +12,8 @@
   --bg-card-hover: #252017;
   --text: #F0EDE8;
   --text-muted: #8a8480;
-  --accent: #c4a35a;
-  --accent-hover: #d4b36a;
+  --accent: #E62B0A;
+  --accent-hover: #f03b1a;
   --border: rgba(255,255,255,0.08);
   --nav-bg: rgba(20,18,16,0.92);
   --shadow: 0 4px 32px rgba(0,0,0,0.4);
@@ -27,8 +27,8 @@ body.light-mode {
   --bg-card-hover: #E8E2D8;
   --text: #1a1a18;
   --text-muted: #6b6560;
-  --accent: #c4a35a;
-  --accent-hover: #b39348;
+  --accent: #E62B0A;
+  --accent-hover: #cc2508;
   --border: rgba(0,0,0,0.08);
   --nav-bg: rgba(250,248,245,0.92);
   --shadow: 0 4px 32px rgba(0,0,0,0.08);
@@ -293,16 +293,16 @@ nav {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(196,163,90,0.07) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(196,163,90,0.04) 0%, transparent 60%);
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(230,43,10,0.07) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 20% 80%, rgba(230,43,10,0.04) 0%, transparent 60%);
 }
 
 .hero-grid {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(196,163,90,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(196,163,90,0.04) 1px, transparent 1px);
+    linear-gradient(rgba(230,43,10,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(230,43,10,0.04) 1px, transparent 1px);
   background-size: 60px 60px;
   mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
   -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
@@ -323,7 +323,7 @@ nav {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--accent);
-  border: 1px solid rgba(196,163,90,0.3);
+  border: 1px solid rgba(230,43,10,0.3);
   border-radius: 100px;
   padding: 6px 16px;
   margin-bottom: 32px;
@@ -369,7 +369,7 @@ nav {
 .btn:hover {
   background: var(--accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(196,163,90,0.3);
+  box-shadow: 0 8px 24px rgba(230,43,10,0.3);
 }
 
 .btn-outline {
@@ -384,7 +384,7 @@ nav {
 }
 
 .hero-trust {
-  margin-top: 20px;
+  margin-top: 32px;
   font-size: 13px;
   color: var(--text-muted);
   letter-spacing: 0.02em;
@@ -440,14 +440,14 @@ nav {
 }
 
 .problem-card:hover {
-  border-color: rgba(196,163,90,0.3);
+  border-color: rgba(230,43,10,0.3);
   transform: translateY(-3px);
 }
 
 .problem-icon {
   width: 48px;
   height: 48px;
-  background: rgba(196,163,90,0.1);
+  background: rgba(230,43,10,0.1);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -570,19 +570,19 @@ nav {
 }
 
 .service-card:hover {
-  border-color: rgba(196,163,90,0.3);
+  border-color: rgba(230,43,10,0.3);
   transform: translateY(-3px);
   background: var(--bg-card-hover);
 }
 
 .service-card.cta-card {
-  border-color: rgba(196,163,90,0.2);
-  background: rgba(196,163,90,0.04);
+  border-color: rgba(230,43,10,0.2);
+  background: rgba(230,43,10,0.04);
 }
 
 .service-card.cta-card:hover {
   border-color: var(--accent);
-  background: rgba(196,163,90,0.08);
+  background: rgba(230,43,10,0.08);
 }
 
 .service-icon {
@@ -638,7 +638,7 @@ nav {
 }
 
 .team-card:hover {
-  border-color: rgba(196,163,90,0.25);
+  border-color: rgba(230,43,10,0.25);
   transform: translateY(-3px);
 }
 
@@ -648,15 +648,15 @@ nav {
   border-radius: 50%;
   object-fit: cover;
   margin: 0 auto 20px;
-  border: 2px solid rgba(196,163,90,0.3);
+  border: 2px solid rgba(230,43,10,0.3);
 }
 
 .team-photo-placeholder {
   width: 140px;
   height: 140px;
   border-radius: 50%;
-  background: rgba(196,163,90,0.12);
-  border: 2px solid rgba(196,163,90,0.3);
+  background: rgba(230,43,10,0.12);
+  border: 2px solid rgba(230,43,10,0.3);
   display: flex;
   align-items: center;
   justify-content: center;

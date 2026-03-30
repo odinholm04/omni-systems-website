@@ -130,15 +130,8 @@ nav {
   font-family: 'Playfair Display', serif;
   font-size: 16px;
   font-weight: 700;
-  color: var(--accent);
+  color: #ffffff;
   letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.nav-logo-tagline {
-  font-size: 10px;
-  color: var(--text-muted);
-  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -162,7 +155,7 @@ nav {
 
 .nav-cta {
   background: transparent !important;
-  color: var(--accent) !important;
+  color: #ffffff !important;
   border: 2px solid var(--accent) !important;
   padding: 7px 17px !important;
   border-radius: 8px !important;
@@ -173,7 +166,7 @@ nav {
 
 .nav-cta:hover {
   background: var(--accent) !important;
-  color: #141210 !important;
+  color: #000000 !important;
   transform: translateY(-1px);
 }
 
@@ -268,7 +261,7 @@ nav {
 .mobile-menu .mobile-cta {
   margin-top: 16px;
   background: transparent;
-  color: var(--accent);
+  color: #ffffff;
   text-align: center;
   padding: 12px 14px;
   border-radius: 10px;
@@ -362,7 +355,7 @@ nav {
 .btn {
   display: inline-block;
   background: transparent;
-  color: var(--accent);
+  color: #ffffff;
   font-family: 'Inter', sans-serif;
   font-size: 16px;
   font-weight: 600;
@@ -376,7 +369,7 @@ nav {
 
 .btn:hover {
   background: var(--accent);
-  color: #141210;
+  color: #000000;
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(230,43,10,0.3);
 }
@@ -506,31 +499,7 @@ nav {
   position: relative;
 }
 
-.step::after {
-  content: '';
-  position: absolute;
-  top: 24px;
-  right: -1px;
-  width: 50%;
-  height: 1px;
-  background: linear-gradient(90deg, var(--accent), transparent);
-  opacity: 0.3;
-}
-
-.step:last-child::after { display: none; }
-
-.step::before {
-  content: '';
-  position: absolute;
-  top: 24px;
-  left: -1px;
-  width: 50%;
-  height: 1px;
-  background: linear-gradient(270deg, var(--accent), transparent);
-  opacity: 0.3;
-}
-
-.step:first-child::before { display: none; }
+.step::after, .step::before { display: none; }
 
 .step-number {
   width: 48px;
@@ -807,7 +776,7 @@ footer {
   font-family: 'Playfair Display', serif;
   font-size: 14px;
   font-weight: 700;
-  color: var(--accent);
+  color: #ffffff;
   letter-spacing: 0.05em;
 }
 

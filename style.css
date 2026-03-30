@@ -34,6 +34,15 @@ body.light-mode {
   --shadow: 0 4px 32px rgba(0,0,0,0.08);
 }
 
+/* ── Light mode text colour overrides ── */
+/* Elements with red-orange border get black/dark text in light mode */
+.light-mode .nav-logo-name { color: #1a1a1a; }
+.light-mode .footer-logo-text { color: #1a1a1a; }
+.light-mode .btn { color: #1a1a1a; }
+.light-mode .nav-cta { color: #1a1a1a !important; }
+.light-mode .mobile-cta { color: #1a1a1a; }
+.light-mode .step-number { color: #1a1a1a; }
+
 /* ── Paper grain texture ── */
 body::before {
   content: '';
@@ -505,7 +514,7 @@ nav {
   width: 48px;
   height: 48px;
   background: transparent;
-  color: var(--accent);
+  color: #ffffff;
   border: 2px solid var(--accent);
   border-radius: 50%;
   display: flex;

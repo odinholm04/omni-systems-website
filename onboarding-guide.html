@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Onboarding Guide — Omni Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --surface2: #181818;
+      --border: #222222;
+      --gold: #c4a35a;
+      --gold-dim: rgba(196,163,90,0.15);
+      --red: #E62B0A;
+      --white: #f0ede8;
+      --muted: #888888;
+      --font-body: 'Inter', sans-serif;
+      --font-display: 'Playfair Display', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 1.75;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Paper grain texture */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.5;
+    }
+
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 40px 0 48px;
+      text-align: center;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 28px;
+      text-decoration: none;
+    }
+
+    .logo-mark {
+      width: 36px;
+      height: 36px;
+      border: 1.5px solid var(--gold);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-mark svg {
+      width: 18px;
+      height: 18px;
+      fill: var(--gold);
+    }
+
+    .logo-name {
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--white);
+    }
+
+    .header-eyebrow {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+
+    header h1 {
+      font-family: var(--font-display);
+      font-size: clamp(28px, 5vw, 44px);
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.2;
+    }
+
+    header h1 em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    .header-sub {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* ── NAV ── */
+    .toc {
+      margin: 48px 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+    }
+
+    .toc-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+    }
+
+    .toc ol {
+      list-style: none;
+      counter-reset: toc;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 8px 24px;
+    }
+
+    .toc ol li {
+      counter-increment: toc;
+    }
+
+    .toc ol li a {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      color: var(--white);
+      text-decoration: none;
+      font-size: 14px;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .toc ol li a::before {
+      content: counter(toc, decimal-leading-zero);
+      font-size: 11px;
+      color: var(--gold);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .toc ol li a:hover { opacity: 1; }
+
+    /* ── SECTIONS ── */
+    section {
+      margin: 64px 0;
+    }
+
+    .section-eyebrow {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    section h2 {
+      font-family: var(--font-display);
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: 400;
+      color: var(--white);
+      line-height: 1.25;
+      margin-bottom: 20px;
+    }
+
+    section h3 {
+      font-family: var(--font-body);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    section p {
+      color: rgba(240,237,232,0.82);
+      margin-bottom: 16px;
+      font-size: 15.5px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 64px 0;
+    }
+
+    /* ── INTRO BLOCK ── */
+    .intro-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-top: 8px;
+    }
+
+    .intro-card p { margin-bottom: 14px; font-size: 15.5px; color: rgba(240,237,232,0.85); }
+    .intro-card p:last-child { margin-bottom: 0; }
+
+    /* ── TIMELINE PHASES ── */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 8px;
+    }
+
+    .phase-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px 28px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 20px;
+      align-items: start;
+      transition: border-color 0.2s;
+    }
+
+    .phase-card:hover { border-color: var(--gold); }
+
+    .phase-badge {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 8px 14px;
+      text-align: center;
+      flex-shrink: 0;
+      min-width: 90px;
+    }
+
+    .phase-badge .weeks {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold);
+      display: block;
+    }
+
+    .phase-badge .wk-num {
+      font-family: var(--font-display);
+      font-size: 20px;
+      color: var(--gold);
+      display: block;
+      line-height: 1.1;
+    }
+
+    .phase-body h4 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 8px;
+    }
+
+    .phase-body p {
+      font-size: 14.5px;
+      color: rgba(240,237,232,0.7);
+      margin: 0;
+    }
+
+    .phase-optional {
+      display: inline-block;
+      background: rgba(230,43,10,0.12);
+      border: 1px solid rgba(230,43,10,0.3);
+      color: var(--red);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 10px;
+      vertical-align: middle;
+    }
+
+    /* ── NUMBERED STEP CARDS ── */
+    .steps-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 32px;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .step-number {
+      width: 48px;
+      height: 48px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: 18px;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    .step-content h4 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 10px;
+    }
+
+    .step-content p {
+      font-size: 14.5px;
+      color: rgba(240,237,232,0.78);
+      margin-bottom: 14px;
+    }
+
+    .step-content p:last-child { margin-bottom: 0; }
+
+    /* how-to instructions */
+    .how-to {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 12px;
+    }
+
+    .how-to-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .how-to ol {
+      list-style: none;
+      counter-reset: howto;
+      padding: 0;
+    }
+
+    .how-to ol li {
+      counter-increment: howto;
+      display: flex;
+      gap: 10px;
+      font-size: 13.5px;
+      color: rgba(240,237,232,0.72);
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
+
+    .how-to ol li:last-child { margin-bottom: 0; }
+
+    .how-to ol li::before {
+      content: counter(howto);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+      background: var(--gold-dim);
+      border-radius: 50%;
+      min-width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      background: rgba(196,163,90,0.12);
+      color: var(--gold);
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    /* ── CHECKLIST ── */
+    .checklist {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .checklist li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 14.5px;
+      color: rgba(240,237,232,0.82);
+      transition: border-color 0.2s;
+    }
+
+    .checklist li:hover { border-color: rgba(196,163,90,0.4); }
+
+    .checkbox {
+      width: 20px;
+      height: 20px;
+      border: 1.5px solid var(--gold);
+      border-radius: 4px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+
+    /* ── WHAT WE HANDLE ── */
+    .handles-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .handle-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 14px;
+      color: rgba(240,237,232,0.8);
+    }
+
+    .handle-icon {
+      color: var(--gold);
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    /* ── SECURITY ── */
+    .security-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .security-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid rgba(196,163,90,0.5);
+      border-radius: 10px;
+      padding: 18px 24px;
+    }
+
+    .security-item h5 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+
+    .security-item p {
+      font-size: 14px;
+      color: rgba(240,237,232,0.68);
+      margin: 0;
+    }
+
+    /* ── SUPPORT ── */
+    .support-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+
+    .support-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+
+    .support-card .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .support-card p {
+      font-size: 14px;
+      color: rgba(240,237,232,0.75);
+      margin: 0;
+    }
+
+    /* ── FAQ ACCORDION ── */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    details.faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    details.faq-item[open] {
+      border-color: rgba(196,163,90,0.5);
+    }
+
+    details.faq-item summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      cursor: pointer;
+      list-style: none;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--white);
+      user-select: none;
+      gap: 16px;
+    }
+
+    details.faq-item summary::-webkit-details-marker { display: none; }
+
+    details.faq-item summary::after {
+      content: '+';
+      font-size: 22px;
+      color: var(--gold);
+      flex-shrink: 0;
+      line-height: 1;
+      transition: transform 0.2s;
+    }
+
+    details.faq-item[open] summary::after {
+      content: '−';
+    }
+
+    .faq-answer {
+      padding: 0 24px 20px;
+      font-size: 14.5px;
+      color: rgba(240,237,232,0.72);
+      line-height: 1.7;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+      text-align: center;
+    }
+
+    .footer-logo {
+      font-family: var(--font-body);
+      font-weight: 600;
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .footer-links a {
+      color: rgba(240,237,232,0.55);
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--gold); }
+
+    .footer-copy {
+      font-size: 12px;
+      color: rgba(240,237,232,0.3);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .page-wrap { padding: 0 16px; }
+      .step-card { grid-template-columns: 1fr; }
+      .step-number { display: none; }
+      .toc ol { grid-template-columns: 1fr; }
+      .phase-card { grid-template-columns: 1fr; }
+      .phase-badge { width: fit-content; }
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      body {
+        background: #ffffff;
+        color: #111111;
+      }
+      body::before { display: none; }
+      header, section, footer { border-color: #dddddd; }
+      .intro-card, .phase-card, .step-card, .checklist li,
+      .handle-item, .security-item, .support-card, details.faq-item {
+        background: #f8f8f8;
+        border-color: #dddddd;
+        color: #111111;
+      }
+      .phase-card:hover, .checklist li:hover { border-color: #dddddd; }
+      :root {
+        --gold: #8a6d1e;
+        --white: #111111;
+        --muted: #555555;
+        --surface: #f8f8f8;
+        --surface2: #eeeeee;
+        --border: #dddddd;
+        --bg: #ffffff;
+      }
+      section p, .phase-body p, .step-content p, .security-item p,
+      .support-card p, .faq-answer {
+        color: #333333;
+      }
+      details.faq-item[open] { border-color: #aaaaaa; }
+      a { color: #8a6d1e; }
+      .toc ol li a::before { color: #8a6d1e; }
+      code { background: #eeeeee; color: #8a6d1e; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- HEADER -->
+  <header>
+    <a href="https://omni-systems.ai" class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="3.5"/>
+          <circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.2"/>
+          <line x1="10" y1="2" x2="10" y2="18" stroke="currentColor" stroke-width="1"/>
+          <line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="1"/>
+        </svg>
+      </div>
+      <span class="logo-name">Omni Systems</span>
+    </a>
+    <div class="header-eyebrow">New Client Document</div>
+    <h1>Client Onboarding <em>Guide</em></h1>
+    <p class="header-sub">Everything you need to get your AI agent live — and what to expect along the way.</p>
+  </header>
+
+  <!-- TABLE OF CONTENTS -->
+  <nav class="toc" aria-label="Page contents">
+    <div class="toc-title">Contents</div>
+    <ol>
+      <li><a href="#what-happening">What's happening</a></li>
+      <li><a href="#timeline">Timeline &amp; phases</a></li>
+      <li><a href="#tech-lead">For your technical lead</a></li>
+      <li><a href="#ops-lead">For your operations lead</a></li>
+      <li><a href="#we-handle">What we handle</a></li>
+      <li><a href="#security">Privacy &amp; security</a></li>
+      <li><a href="#support">Ongoing support</a></li>
+      <li><a href="#faq">Frequently asked questions</a></li>
+    </ol>
+  </nav>
+
+  <!-- WHAT'S HAPPENING -->
+  <section id="what-happening">
+    <div class="section-eyebrow">Overview</div>
+    <h2>What's happening</h2>
+    <div class="intro-card">
+      <p>Over the next few weeks, we're building a custom AI assistant that lives inside your Slack workspace and understands your codebase, your team's way of working, and your product.</p>
+      <p>Think of it as a new team member who has read every line of code in your repositories, knows your documentation, and is available in Slack whenever your team needs them - whether that's writing a feature, creating a pull request, reviewing recent changes, or drafting a document.</p>
+      <p>Unlike generic AI tools, this agent is built specifically for your environment. It knows your tech stack, your coding conventions, your branch workflow, and your brand voice. It doesn't need to be taught from scratch every session. It remembers.</p>
+      <p>We handle everything on the technical side. You never need to touch a server, manage infrastructure, or worry about keeping it up to date. We do all of that.</p>
+      <p>By the end of setup, your team will have a working AI assistant that can be given tasks directly in Slack - and that gets more useful the more you use it.</p>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TIMELINE -->
+  <section id="timeline">
+    <div class="section-eyebrow">Rollout plan</div>
+    <h2>What to expect - timeline</h2>
+    <div class="timeline">
+      <div class="phase-card">
+        <div class="phase-badge">
+          <span class="weeks">Weeks</span>
+          <span class="wk-num">1-2</span>
+        </div>
+        <div class="phase-body">
+          <h4>Coding agent live in Slack</h4>
+          <p>Your AI assistant is set up, connected to your GitHub, and accessible in Slack. Your engineering team can start giving it tasks: write code, create branches and pull requests, summarise recent commits, answer questions about the codebase.</p>
+        </div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-badge">
+          <span class="weeks">Weeks</span>
+          <span class="wk-num">2-4</span>
+        </div>
+        <div class="phase-body">
+          <h4>Automated QA testing <span class="phase-optional">if included</span></h4>
+          <p>The agent is extended to run automated tests against your staging environment - catching regressions before they reach review. It can report results back to Slack and flag failures with context.</p>
+        </div>
+      </div>
+      <div class="phase-card">
+        <div class="phase-badge">
+          <span class="weeks">Weeks</span>
+          <span class="wk-num">3-5</span>
+        </div>
+        <div class="phase-body">
+          <h4>Workflow automation <span class="phase-optional">if included</span></h4>
+          <p>We build automations around your recurring operations work: drafting contracts or proposals in your voice, summarising meetings, or handling repetitive document preparation. The exact scope here is tailored to what we found in our discovery conversation.</p>
+        </div>
+      </div>
+    </div>
+    <p style="margin-top: 20px; font-size: 14px; color: var(--muted);">Each phase begins as soon as the previous one is stable. You'll hear from us at each milestone, and nothing advances without your sign-off.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- TECH LEAD -->
+  <section id="tech-lead">
+    <div class="section-eyebrow">Access requirements</div>
+    <h2>For your technical lead</h2>
+    <p>These are the technical access credentials that allow the agent to connect to your systems. Your technical lead will know how to find all of these, and we're happy to jump on a quick call to walk through any of them.</p>
+
+    <div class="steps-grid">
+
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>GitHub Personal Access Token</h4>
+          <p>This allows the agent to read your repositories, create branches, and open pull requests on your team's behalf.</p>
+          <div class="how-to">
+            <div class="how-to-label">How to create</div>
+            <ol>
+              <li>Go to github.com, click your profile picture, then Settings</li>
+              <li>In the left sidebar, scroll to Developer settings &rarr; Personal access tokens &rarr; Fine-grained tokens</li>
+              <li>Click "Generate new token" and name it <code>Omni Agent</code></li>
+              <li>Set expiry to 1 year</li>
+              <li>Under Permissions, grant: Repository (read and write), Organisation (read), Workflows (read and write)</li>
+              <li>Click Generate and copy the token</li>
+            </ol>
+          </div>
+          <p style="margin-top: 14px; font-size: 13px; color: var(--muted);">Send via the secure link we provide - not by email.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Slack Bot Token</h4>
+          <p>This gives the agent a presence in your Slack workspace. We'll walk you through creating the Slack app together on a short call - it takes about 10 minutes. At the end, you'll have a token starting with <code>xoxb-</code> to send to us.</p>
+          <p>If you'd prefer to do it yourself, we'll send a step-by-step guide.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Staging URL</h4>
+          <p>The full web address of your staging environment, for example: <code>https://staging.yourapp.com</code></p>
+          <p>This lets the agent run tests against a real environment without touching production.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h4>Tech stack confirmation</h4>
+          <p>A quick written confirmation of your setup:</p>
+          <ul class="checklist" style="margin-top: 12px;">
+            <li><div class="checkbox"></div>Primary programming language and framework</li>
+            <li><div class="checkbox"></div>Package manager (npm, yarn, pnpm, etc.)</li>
+            <li><div class="checkbox"></div>Test runner (Jest, Vitest, Pytest, etc.)</li>
+            <li><div class="checkbox"></div>Main branch name (<code>main</code> or <code>master</code>)</li>
+            <li><div class="checkbox"></div>Branch naming convention (e.g. <code>feat/</code>, <code>fix/</code>)</li>
+            <li><div class="checkbox"></div>Whether pull requests require a reviewer before merging</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <h4>Notion integration <span class="phase-optional">if applicable</span></h4>
+          <p>This allows the agent to read your documentation.</p>
+          <div class="how-to">
+            <div class="how-to-label">How to set up</div>
+            <ol>
+              <li>Go to notion.so/my-integrations</li>
+              <li>Click "New integration", name it <code>Omni Agent</code>, and link it to your workspace</li>
+              <li>Click Submit - you'll see a token starting with <code>secret_</code></li>
+              <li>Share your main documentation pages with the integration (open the page, click "..." &rarr; Add connections &rarr; select Omni Agent)</li>
+            </ol>
+          </div>
+          <p style="margin-top: 14px; font-size: 13px; color: var(--muted);">Send the token via the secure link we provide.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">6</div>
+        <div class="step-content">
+          <h4>Branding assets</h4>
+          <p>Your logo (SVG or high-resolution PNG) and your primary brand colour (hex code, e.g. <code>#1A2B3C</code>). Used to give the agent a consistent visual identity in any outputs it produces.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">7</div>
+        <div class="step-content">
+          <h4>Git workflow confirmation</h4>
+          <p>A brief note confirming how your team works with git. This is usually covered in our discovery call, but written confirmation is helpful.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- OPS LEAD -->
+  <section id="ops-lead">
+    <div class="section-eyebrow">Access requirements</div>
+    <h2>For your operations lead</h2>
+    <p>These things help us calibrate the agent's tone and give it the context it needs for any communication or document tasks.</p>
+
+    <div class="steps-grid">
+
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>Gmail app password <span class="phase-optional">if email automation included</span></h4>
+          <p>A special one-time password that lets the agent send emails on your behalf. It's different from your regular Gmail password and can be revoked at any time without changing your account password.</p>
+          <div class="how-to">
+            <div class="how-to-label">How to create</div>
+            <ol>
+              <li>Go to myaccount.google.com</li>
+              <li>Click Security &rarr; 2-Step Verification (you'll need this enabled)</li>
+              <li>Scroll to App passwords &rarr; click the arrow</li>
+              <li>Choose "Mail" and "Other device", type <code>Omni Agent</code>, click Generate</li>
+              <li>Copy the 16-character code (spaces don't matter)</li>
+            </ol>
+          </div>
+          <p style="margin-top: 14px; font-size: 13px; color: var(--muted);">Send via the secure link we provide.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>Sample documents</h4>
+          <p>Two or three examples of contracts, proposals, or statements of work that your team typically sends to clients. These don't need to be real - anonymised versions are fine, and so is anything you've already sent publicly. PDF or Word format works.</p>
+          <p>These help us tune the agent so it drafts in your structure and style, not a generic template.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>Brand voice examples</h4>
+          <p>A handful of emails or Slack messages that feel representative of how your team communicates with clients. No need to prepare anything - just forward us a few examples you like the tone of.</p>
+          <p>This is the quickest way to help the agent sound like your team rather than a generic AI.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- WHAT WE HANDLE -->
+  <section id="we-handle">
+    <div class="section-eyebrow">Our responsibilities</div>
+    <h2>What we handle</h2>
+    <p>Once we have what's listed above, everything else is on us.</p>
+    <div class="handles-grid">
+      <div class="handle-item"><span class="handle-icon">&#9679;</span>Setting up and configuring the server</div>
+      <div class="handle-item"><span class="handle-icon">&#9679;</span>Installing and configuring the agent software</div>
+      <div class="handle-item"><span class="handle-icon">&#9679;</span>Connecting all integrations</div>
+      <div class="handle-item"><span class="handle-icon">&#9679;</span>Deploying and testing the agent</div>
+      <div class="handle-item"><span class="handle-icon">&#9679;</span>Monitoring on an ongoing basis</div>
+      <div class="handle-item"><span class="handle-icon">&#9679;</span>Pushing updates and improvements</div>
+      <div class="handle-item"><span class="handle-icon">&#9679;</span>Fixing anything that breaks</div>
+    </div>
+    <p style="margin-top: 20px;">You will never need to touch a server, run a terminal command, or manage a deployment. If something goes wrong, we fix it. If your team wants a new capability added, you ask us and we build it.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SECURITY -->
+  <section id="security">
+    <div class="section-eyebrow">Trust &amp; transparency</div>
+    <h2>Privacy &amp; security</h2>
+    <p>We take this seriously. Here's exactly what we can and can't see.</p>
+    <div class="security-grid">
+      <div class="security-item">
+        <h5>Credentials are stored in an encrypted system keychain</h5>
+        <p>Not in any file, database, spreadsheet, or cloud storage. Used only to authenticate the agent to your systems.</p>
+      </div>
+      <div class="security-item">
+        <h5>Your code and data stay on your infrastructure</h5>
+        <p>The agent runs on a server dedicated to your account - either in your own Hetzner Cloud account, or one we provision that is logically isolated from all other clients. We do not copy your codebase to our systems.</p>
+      </div>
+      <div class="security-item">
+        <h5>We can access your server for maintenance</h5>
+        <p>We have SSH access to your agent's server for the purposes of maintaining, updating, and troubleshooting it. We use this to keep your agent running - not to examine your data.</p>
+      </div>
+      <div class="security-item">
+        <h5>Tokens can be revoked at any time</h5>
+        <p>If you ever want to end the engagement or rotate credentials, simply revoke the tokens you provided and let us know. We'll update our end accordingly.</p>
+      </div>
+      <div class="security-item">
+        <h5>We never share your data with third parties</h5>
+        <p>Your credentials, code, and documents are never shared with any third party.</p>
+      </div>
+    </div>
+    <p style="margin-top: 20px; font-size: 14px; color: var(--muted);">If you have specific compliance requirements - GDPR, SOC2, data residency - let us know and we'll make sure the setup addresses them explicitly.</p>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- SUPPORT -->
+  <section id="support">
+    <div class="section-eyebrow">Ongoing</div>
+    <h2>Ongoing support</h2>
+    <div class="support-grid">
+      <div class="support-card">
+        <div class="label">How to reach us</div>
+        <p>The shared Slack channel we'll set up with you at the start of the engagement. For urgent issues, you can also email us directly.</p>
+      </div>
+      <div class="support-card">
+        <div class="label">Response time</div>
+        <p>A few hours during business hours. For production issues (agent is completely down), we target a response within 1 hour.</p>
+      </div>
+      <div class="support-card">
+        <div class="label">Maintenance</div>
+        <p>We handle all maintenance proactively - software updates, security patches, credential rotation reminders. You don't need to ask.</p>
+      </div>
+      <div class="support-card">
+        <div class="label">Requesting changes</div>
+        <p>Let us know in Slack. We'll assess the scope and give you a clear answer on what's involved.</p>
+      </div>
+      <div class="support-card">
+        <div class="label">Monthly check-in</div>
+        <p>A brief 15-30 minute call to review how the agent is being used, discuss friction points, and agree on the next round of improvements.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="section-eyebrow">Common questions</div>
+    <h2>Frequently asked questions</h2>
+    <div class="faq-list">
+
+      <details class="faq-item">
+        <summary>Can the agent push code directly to our main branch?</summary>
+        <div class="faq-answer">No. The agent always creates a new branch and opens a pull request. It never pushes directly to your main or master branch. Your team reviews and merges as normal.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What happens if the agent makes a mistake?</summary>
+        <div class="faq-answer">The same thing that happens with any developer - you review the PR and request changes, or reject it. The agent can be given feedback directly in Slack ("that approach won't work because...") and it will adjust. Over time, it gets better at understanding your team's standards.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Who can talk to the agent?</summary>
+        <div class="faq-answer">Anyone you invite to the agent's Slack channel. You control who has access. We recommend starting with your engineering team and expanding from there once they're comfortable with it.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>Does the agent read all of our Slack messages?</summary>
+        <div class="faq-answer">No. The agent only reads messages in channels it has been explicitly added to, and direct messages sent to it. It does not have access to your broader Slack workspace history.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What if we want to add a new repository or tool later?</summary>
+        <div class="faq-answer">Just let us know. Adding new repositories or integrations is a standard maintenance task. We'll update the agent's configuration and deploy the change - usually within a day.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>What if we want to pause or cancel?</summary>
+        <div class="faq-answer">You can pause or end the engagement at any time. On your side, you revoke the tokens you've provided. On our side, we shut down the agent's server and delete all associated credentials. There's no lock-in.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary>How is this different from using ChatGPT or GitHub Copilot?</summary>
+        <div class="faq-answer">General AI tools are general - they don't know your codebase, your team's conventions, your staging environment, or your brand voice. They also don't take action: they can't create branches, open PRs, or send emails. Your Omni agent is configured specifically for your environment and can act, not just advise. It also maintains memory across sessions, so it gets more useful over time rather than starting from scratch every conversation.</div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Omni Systems</div>
+    <div class="footer-links">
+      <a href="https://omni-systems.ai">omni-systems.ai</a>
+      <a href="mailto:hello@omni-systems.ai">hello@omni-systems.ai</a>
+    </div>
+    <div class="footer-copy">Questions? Reach us in Slack or by email.</div>
+  </footer>
+
+</div>
+</body>
+</html>

@@ -379,6 +379,69 @@ input:focus, textarea:focus, select:focus { border-color: var(--amber); }
 .triage-keys .btn { display: flex; flex-direction: column; gap: 2px; min-width: 96px; }
 .triage-keys .btn small { color: var(--faint); font-weight: 400; }
 
+/* ---------- rituals / The Daily Saga ---------- */
+.saga-bar { display: flex; align-items: center; gap: 18px; margin-bottom: 14px; flex-wrap: wrap; }
+.rank-badge { display: flex; align-items: center; gap: 12px; }
+.rank-rune {
+  width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 24px; color: #0a0b0c; background: linear-gradient(135deg, var(--amber), #b06f1e);
+  box-shadow: 0 0 18px rgba(232,163,61,.25);
+}
+.rank-name { font-weight: 800; font-size: 16px; letter-spacing: .04em; }
+.rank-xp { font-size: 11px; color: var(--faint); }
+.rank-track { flex: 1; min-width: 140px; height: 9px; background: var(--raised-2); border-radius: 99px; overflow: hidden; }
+.rank-track > i { display: block; height: 100%; background: linear-gradient(90deg, var(--amber), var(--amber-bright)); border-radius: 99px; }
+.saga-streaks { display: flex; gap: 16px; font-size: 13px; color: var(--mute); }
+.perfect-glow { color: var(--amber-bright); text-shadow: 0 0 12px rgba(242,182,90,.6); }
+.perfect-banner {
+  margin-bottom: 14px; text-align: center; font-weight: 700; color: var(--amber-bright);
+  border-color: rgba(232,163,61,.5); background: rgba(232,163,61,.07);
+  animation: perfect-pulse 2.4s ease-in-out infinite;
+}
+@keyframes perfect-pulse { 50% { box-shadow: 0 0 24px rgba(232,163,61,.25); } }
+
+.ritual-card.complete { border-color: rgba(121,185,140,.45); }
+.ritual-step {
+  display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 8px;
+  cursor: pointer; border: 1px solid transparent; user-select: none;
+}
+.ritual-step:hover { background: var(--raised); }
+.ritual-step.next { border-color: rgba(232,163,61,.5); background: rgba(232,163,61,.06); }
+.ritual-step .rs-check {
+  width: 20px; height: 20px; min-width: 20px; border-radius: 50%; border: 1.5px solid var(--faint);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #0a0b0c;
+}
+.ritual-step.done .rs-check { background: var(--green); border-color: var(--green); }
+.ritual-step.done .rs-title { text-decoration: line-through; color: var(--faint); }
+.rs-num, .rs-time { font-size: 10.5px; color: var(--faint); width: 40px; min-width: 40px; text-align: right; }
+.rs-time { color: var(--amber-bright); }
+.rs-title { font-size: 14px; }
+.ritual-victory { text-align: center; color: var(--green); font-weight: 600; font-size: 13.5px; margin: 12px 0 2px; }
+
+.rune-wall { display: grid; grid-template-columns: repeat(14, 1fr); gap: 6px; }
+@media (max-width: 900px) { .rune-wall { grid-template-columns: repeat(7, 1fr); } }
+.rune-cell {
+  border: 1px solid var(--line); border-radius: 8px; padding: 6px 2px 4px; text-align: center;
+  background: var(--panel);
+}
+.rune-cell .rune-glyph { display: block; font-size: 17px; color: var(--raised-2); line-height: 1.2; }
+.rune-cell.perfect { border-color: rgba(232,163,61,.55); background: rgba(232,163,61,.06); }
+.rune-cell.perfect .rune-glyph { color: var(--amber-bright); text-shadow: 0 0 10px rgba(242,182,90,.55); }
+.rune-dots { display: flex; gap: 3px; justify-content: center; margin: 3px 0 2px; }
+.rune-dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--raised-2); }
+.rune-dots i.on-m { background: var(--amber); }
+.rune-dots i.on-n { background: var(--blue); }
+.rune-day { font-family: var(--mono); font-size: 9px; color: var(--faint); }
+
+.ritual-strip {
+  display: flex; align-items: center; gap: 14px; padding: 9px 14px; margin-bottom: 14px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  color: var(--cream); font-size: 12.5px;
+}
+.ritual-strip:hover { border-color: var(--line-strong); }
+.ritual-strip.perfect { border-color: rgba(232,163,61,.5); }
+.ritual-strip .rs-hint { color: var(--amber-bright); }
+
 @media (max-width: 860px) {
   #sidebar { width: 64px; flex-basis: 64px; padding: 12px 6px; }
   .brand div:last-child, #nav a span:not(.nav-key):not(.nav-badge) { display: none; }

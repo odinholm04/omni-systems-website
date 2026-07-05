@@ -20,6 +20,22 @@ const defaults = () => ({
   notes: [],       // {id,title,body,tags,pinned,daily,createdAt,updatedAt}
   sessions: [],    // {id,taskId,mode,plannedMin,startedAt,endedAt,minutes,completed,distractions}
   goals: [],       // {id,year,quarter,theme,why,priorities:[{id,title,metric,tag,done}]}
+  habits: {        // The Daily Saga — morning + night rituals (sourced from the Notion brain)
+    bedtime: '21:30',
+    morning: [
+      'Wake up', 'No phone', '10-minute morning walk', 'Back home',
+      '12-minute mobility session', 'Shower — 25 push-ups while water warms up',
+      'Shave', 'Brush your teeth', 'Floss', 'Caffeine', 'Get to work!',
+    ],
+    night: [
+      { offsetMin: 180, title: 'Stop eating' },
+      { offsetMin: 120, title: 'Red light glasses on' },
+      { offsetMin: 60, title: 'No screens — wind down' },
+      { offsetMin: 30, title: 'Journal · calming music · magnesium' },
+      { offsetMin: 0, title: 'Lights out' },
+    ],
+    log: {},       // ymd -> {m:[stepIdx…], n:[stepIdx…]}
+  },
   days: {},        // ymd -> {planned:[taskIds], plannedAt, shutdownAt, reflection}
   weeks: {},       // monday-ymd -> {objectives:[{id,title,done}], reflection, reviewedAt}
   focus: null,     // active session {taskId,mode,plannedMin,startedAt,pausedAt,accumMs,breakUntil}
@@ -34,7 +50,11 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (!raw) return seed(defaults());
     const data = JSON.parse(raw);
-    return { ...defaults(), ...data, settings: { ...defaults().settings, ...(data.settings || {}) } };
+    return {
+      ...defaults(), ...data,
+      settings: { ...defaults().settings, ...(data.settings || {}) },
+      habits: { ...defaults().habits, ...(data.habits || {}) },
+    };
   } catch (e) {
     console.error('Mimir: failed to load state, starting fresh', e);
     return seed(defaults());
@@ -104,7 +124,11 @@ export function exportJson() {
 export function importJson(json) {
   const data = JSON.parse(json);
   if (!data || typeof data !== 'object' || !Array.isArray(data.tasks)) throw new Error('Not a Mimir backup file');
-  state = { ...defaults(), ...data, settings: { ...defaults().settings, ...(data.settings || {}) } };
+  state = {
+    ...defaults(), ...data,
+    settings: { ...defaults().settings, ...(data.settings || {}) },
+    habits: { ...defaults().habits, ...(data.habits || {}) },
+  };
   localStorage.setItem(KEY, JSON.stringify(state));
   listeners.forEach(fn => fn());
 }
@@ -278,6 +302,65 @@ export function addGoalQuarter(year, quarter) {
   let g = state.goals.find(x => x.year === year && x.quarter === quarter);
   if (!g) { g = { id: uid(), year, quarter, theme: '', why: '', priorities: [] }; state.goals.push(g); save(); }
   return g;
+}
+
+// ---------- habits / The Daily Saga ----------
+export const RANKS = [
+  ['Thrall', 0], ['Karl', 300], ['Húskarl', 750], ['Víkingr', 1500], ['Berserkr', 2500],
+  ['Jarl', 4000], ['Konungr', 6000], ['Einherji', 8500], ['Allfather', 11500],
+];
+
+export function habitLog(date) {
+  const h = state.habits;
+  if (!h.log[date]) h.log[date] = { m: [], n: [] };
+  return h.log[date];
+}
+export function toggleHabitStep(date, which, idx) {
+  const l = habitLog(date);
+  const arr = l[which];
+  const i = arr.indexOf(idx);
+  if (i >= 0) arr.splice(i, 1); else arr.push(idx);
+  save();
+  return arr.includes(idx);
+}
+// checked count, guarding against steps edited shorter than old logs
+function checkedCount(entry, which) {
+  const total = which === 'm' ? state.habits.morning.length : state.habits.night.length;
+  return (entry?.[which] || []).filter(i => i < total).length;
+}
+export function ritualDone(date, which) {
+  const total = which === 'm' ? state.habits.morning.length : state.habits.night.length;
+  return total > 0 && checkedCount(state.habits.log[date], which) >= total;
+}
+export const perfectDay = date => ritualDone(date, 'm') && ritualDone(date, 'n');
+
+// XP: 5 per step, +20 per completed ritual, +30 for a perfect day.
+export function habitXp() {
+  let xp = 0;
+  Object.keys(state.habits.log).forEach(d => {
+    xp += (checkedCount(state.habits.log[d], 'm') + checkedCount(state.habits.log[d], 'n')) * 5;
+    if (ritualDone(d, 'm')) xp += 20;
+    if (ritualDone(d, 'n')) xp += 20;
+    if (perfectDay(d)) xp += 30;
+  });
+  return xp;
+}
+export function habitRank() {
+  const xp = habitXp();
+  let cur = RANKS[0], next = null;
+  for (let i = 0; i < RANKS.length; i++) {
+    if (xp >= RANKS[i][1]) cur = RANKS[i];
+    else { next = RANKS[i]; break; }
+  }
+  return { xp, name: cur[0], floor: cur[1], next: next ? next[0] : null, ceil: next ? next[1] : null };
+}
+// Consecutive-day streak ending today (today counts only if done; else counted from yesterday).
+export function habitStreak(check) {
+  let d = todayYmd(), streak = 0;
+  if (check(d)) streak++;
+  d = addDays(d, -1);
+  while (check(d)) { streak++; d = addDays(d, -1); }
+  return streak;
 }
 
 // Planned workload (minutes) for a date: task estimates + timeblock durations of non-task events.

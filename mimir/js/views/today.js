@@ -5,6 +5,7 @@ import { toast, renderApp } from '../app.js';
 import { taskRowHtml, wireTaskRows, KIND_LABEL } from './shared.js';
 import { openPlanDay, openShutdown, openTriage } from './wizards.js';
 import { openEventModal, openTaskModal } from './modals.js';
+import { ritualStripHtml } from './rituals.js';
 
 export function renderToday(el) {
   const t = todayYmd();
@@ -37,6 +38,8 @@ export function renderToday(el) {
       ${!day.shutdownAt ? `<button class="btn" id="td-shutdown">◑ Shutdown</button>` : `<span class="chip" style="color:var(--green)">✓ day closed</span>`}
     </div>
   </div>
+
+  ${ritualStripHtml()}
 
   <div class="stat-tiles">
     <div class="stat-tile accent"><div class="sv">${minutesToHM(focusMin)}</div><div class="sl">deep work today · goal ${minutesToHM(s.focusGoalMin)}</div></div>

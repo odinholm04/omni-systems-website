@@ -8,6 +8,7 @@ import { renderNotes } from './views/notes.js';
 import { renderFocus, focusTick, startFocusOnTask } from './views/focus.js';
 import { renderGoals } from './views/goals.js';
 import { renderInsights } from './views/insights.js';
+import { renderRituals } from './views/rituals.js';
 import { openPlanDay, openShutdown, openWeeklyReview, openTriage } from './views/wizards.js';
 import { openTaskModal, openEventModal, openSettingsModal } from './views/modals.js';
 
@@ -19,6 +20,7 @@ const routes = {
   focus: renderFocus,
   goals: renderGoals,
   insights: renderInsights,
+  rituals: renderRituals,
 };
 
 export let currentRoute = 'today';
@@ -133,6 +135,7 @@ function paletteCommands() {
     { k: 'G then 5', t: 'Go to Focus', run: () => navigate('focus') },
     { k: '6', t: 'Go to Goals', run: () => navigate('goals') },
     { k: '7', t: 'Go to Insights', run: () => navigate('insights') },
+    { k: '8', t: 'Go to Rituals (morning & night routine)', run: () => navigate('rituals') },
     { k: 'Q', t: 'Quick add task', run: () => openQuickAdd() },
     { k: 'P', t: 'Plan my day', run: () => openPlanDay() },
     { k: 'S', t: 'Shutdown ritual', run: () => openShutdown() },
@@ -234,12 +237,12 @@ document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (gPending) {
     gPending = false;
-    const map = { '1': 'today', '2': 'tasks', '3': 'calendar', '4': 'notes', '5': 'focus', '6': 'goals', '7': 'insights', t: 'today', k: 'tasks', c: 'calendar', n: 'notes', f: 'focus' };
+    const map = { '1': 'today', '2': 'tasks', '3': 'calendar', '4': 'notes', '5': 'focus', '6': 'goals', '7': 'insights', '8': 'rituals', t: 'today', k: 'tasks', c: 'calendar', n: 'notes', f: 'focus', r: 'rituals' };
     if (map[k]) { navigate(map[k]); return; }
   }
   if (k === 'g') { gPending = true; setTimeout(() => gPending = false, 900); return; }
-  if (k >= '1' && k <= '7') {
-    navigate(['today', 'tasks', 'calendar', 'notes', 'focus', 'goals', 'insights'][+k - 1]); return;
+  if (k >= '1' && k <= '8') {
+    navigate(['today', 'tasks', 'calendar', 'notes', 'focus', 'goals', 'insights', 'rituals'][+k - 1]); return;
   }
   if (k === 'q') { e.preventDefault(); openQuickAdd(); }
   else if (k === 'p') openPlanDay();
@@ -264,6 +267,7 @@ function showShortcuts() {
         <p><span class="kbd">I</span> Triage inbox</p>
         <p><span class="kbd">W</span> Weekly review</p>
         <p><span class="kbd">F</span> Focus</p>
+        <p><span class="kbd">8</span> Rituals</p>
         <p><span class="kbd">?</span> This help</p>
         <p><span class="kbd">Esc</span> Close anything</p>
       </div>
@@ -298,11 +302,16 @@ applyTheme();
 if (!location.hash) location.hash = '#/today';
 renderApp();
 
-// First-open-of-day nudge: suggest planning if not planned yet (after 6am).
+// First-open-of-day nudges: rituals + planning.
 (() => {
-  const d = store.day(todayYmd());
-  const planned = d.plannedAt;
-  if (!planned && new Date().getHours() >= 6 && store.tasksFor(todayYmd()).length + store.inboxTasks().length > 0) {
+  const t = todayYmd();
+  const hour = new Date().getHours();
+  if (!store.day(t).plannedAt && hour >= 6 && store.tasksFor(t).length + store.inboxTasks().length > 0) {
     setTimeout(() => toast('Good morning ✦ Press <span class="kbd">P</span> to plan your day', 'warn'), 900);
+  }
+  if (hour >= 6 && hour < 15 && !store.ritualDone(t, 'm')) {
+    setTimeout(() => toast('☀ The dawn ritual awaits — press <span class="kbd">8</span>', 'warn'), 1600);
+  } else if (hour >= 17 && !store.ritualDone(t, 'n')) {
+    setTimeout(() => toast('☾ Wind-down is near — dusk ritual on <span class="kbd">8</span>', 'warn'), 1600);
   }
 })();

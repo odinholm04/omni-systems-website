@@ -16,6 +16,10 @@ JSON backups from Settings. No backend, no build step, works offline after first
 - **Quarterly goals** — rolling planning: theme + 2–4 priorities; tasks link to priorities; progress tracked
 - **Notes** — markdown, `[[wiki-links]]`, clickable checkboxes, daily notes, note→task
 - **Insights** — 14-day deep work chart, focus streak, hours per project, estimate accuracy, goal alignment
+- **Rituals (`8`) — The Daily Saga** — the newest morning routine ("Byrja daginn 2026") and night
+  routine (wind-down countdown anchored to bedtime) from the Notion brain, gamified: 5 XP per step,
+  +20 per completed ritual, +30 for a perfect day; Norse rank progression (Thrall → … → Allfather),
+  ☀/☾/✦ streaks, and a 28-day rune wall that lights up on perfect days. Steps and bedtime are editable in-app.
 - `⌘K` command palette searches everything; `1–7` switch pages; `?` shows all shortcuts
 
 ## Tests

@@ -416,6 +416,88 @@ st = await getState();
 check('all data persists after reload', st.tasks.length > 5 && st.notes.length >= 3 && st.sessions.length >= 1);
 check('theme persists', await page.getAttribute('html', 'data-theme') === 'light');
 
+// ---------------------------------------------------------------- 16. rituals / The Daily Saga
+console.log('\n16. Rituals — morning & night routine game');
+await page.keyboard.press('8'); await sleep(250);
+check('key 8 → rituals', await page.getAttribute('#nav a.active', 'data-nav') === 'rituals');
+check('11 dawn steps from Notion routine', (await page.$$('[data-step^="m:"]')).length === 11);
+check('5 dusk steps from Notion routine', (await page.$$('[data-step^="n:"]')).length === 5);
+check('dawn steps include the walk', (await page.textContent('#view')).includes('10-minute morning walk'));
+check('dusk steps include red light glasses', (await page.textContent('#view')).includes('Red light glasses'));
+check('night steps anchored to bedtime (21:30 − 3h = 18:30)', (await page.textContent('#view')).includes('18:30'));
+check('rank starts at Thrall', (await page.textContent('.rank-name')) === 'Thrall');
+
+// check 3 morning steps → xp
+await page.click('[data-step="m:0"]'); await page.click('[data-step="m:1"]'); await page.click('[data-step="m:2"]');
+await flush();
+st = await getState();
+check('steps logged', st.habits.log[today] && st.habits.log[today].m.length === 3);
+check('XP awarded (3 steps = 15)', (await page.textContent('.rank-xp')).includes('15 XP'));
+// uncheck one
+await page.click('[data-step="m:2"]'); await flush();
+st = await getState();
+check('step toggles off', st.habits.log[today].m.length === 2);
+
+// complete the full morning ritual
+for (let i = 2; i < 11; i++) { await page.click(`[data-step="m:${i}"]`); }
+await flush();
+st = await getState();
+check('dawn ritual complete', st.habits.log[today].m.length === 11);
+check('completion bonus (11*5+20=75 XP)', (await page.textContent('.rank-xp')).includes('75 XP'));
+check('card shows forged', (await page.textContent('#view')).includes('forged ✓'));
+
+// complete night ritual → perfect day
+for (let i = 0; i < 5; i++) { await page.click(`[data-step="n:${i}"]`); }
+await flush();
+st = await getState();
+check('dusk ritual complete', st.habits.log[today].n.length === 5);
+check('perfect day banner', (await page.textContent('#view')).includes('Perfect day forged'));
+check('perfect XP total (75+25+20+30=150)', (await page.textContent('.rank-xp')).includes('150 XP'));
+check('rune lit on wall', !!(await page.$('.rune-cell.perfect')));
+check('perfect streak = 1', (await page.textContent('.saga-streaks')).includes('✦ 1d'));
+
+// inject 3 prior perfect days → streak 4 and rank progress
+await page.evaluate(() => {
+  const d = JSON.parse(localStorage.getItem('mimir.data.v1'));
+  const all = { m: [0,1,2,3,4,5,6,7,8,9,10], n: [0,1,2,3,4] };
+  for (let i = 1; i <= 3; i++) {
+    const dt = new Date(Date.now() - i*86400000);
+    const k = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
+    d.habits.log[k] = JSON.parse(JSON.stringify(all));
+  }
+  localStorage.setItem('mimir.data.v1', JSON.stringify(d));
+});
+await page.reload(); await sleep(300);
+check('perfect streak = 4 after history', (await page.textContent('.saga-streaks')).includes('✦ 4d'));
+check('rank levels up to Karl (600 XP)', (await page.textContent('.rank-name')) === 'Karl');
+
+// ritual strip on Today
+await page.goto(BASE + '#/today'); await sleep(250);
+check('Today shows ritual strip', !!(await page.$('.ritual-strip')));
+check('strip shows perfect day', (await page.textContent('.ritual-strip')).includes('perfect day'));
+check('strip shows rank + XP', (await page.textContent('.ritual-strip')).includes('Karl'));
+
+// edit rituals: change bedtime → anchors shift
+await page.goto(BASE + '#/rituals'); await sleep(250);
+await page.click('#rt-edit'); await sleep(200);
+await page.fill('#re-bed', '22:00');
+await page.click('#re-save'); await flush();
+check('bedtime saved', (await getState()).habits.bedtime === '22:00');
+check('anchors shift (22:00 − 3h = 19:00)', (await page.textContent('#view')).includes('19:00'));
+
+// edit steps: add a dawn step
+await page.click('#rt-edit'); await sleep(200);
+const ta = await page.inputValue('#re-morning');
+await page.fill('#re-morning', ta + '\nCold plunge');
+await page.click('#re-save'); await flush();
+check('new step added (12 dawn steps)', (await page.$$('[data-step^="m:"]')).length === 12);
+check('dawn ritual reopens after adding a step', (await page.textContent('#view')).includes('11/12'));
+
+// persistence
+await page.reload(); await sleep(300);
+st = await getState();
+check('ritual log persists', st.habits.log[today].m.length === 11 && st.habits.log[today].n.length === 5);
+
 // ---------------------------------------------------------------- done
 console.log(`\n${'='.repeat(50)}\n${passed} passed, ${failed} failed`);
 if (failures.length) { console.log('\nFailures:'); failures.forEach(f => console.log('  ✗ ' + f)); }

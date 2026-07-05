@@ -19,7 +19,19 @@ JSON backups from Settings. No backend, no build step, works offline after first
 - **Rituals (`8`) — The Daily Saga** — the newest morning routine ("Byrja daginn 2026") and night
   routine (wind-down countdown anchored to bedtime) from the Notion brain, gamified: 5 XP per step,
   +20 per completed ritual, +30 for a perfect day; Norse rank progression (Thrall → … → Allfather),
-  ☀/☾/✦ streaks, and a 28-day rune wall that lights up on perfect days. Steps and bedtime are editable in-app.
+  ☀/☾/✦ streaks, and a 28-day rune wall that lights up on perfect days. Ritual names, steps and
+  bedtime are all editable in-app, so anyone can write their own saga.
+- **Quests** — custom daily goals (+10 XP each, own streaks): manual check-offs ("Read 10 pages") or
+  **automatic metric quests** ("Sleep score ≥ 85") that judge themselves from sleep data — logged
+  manually or auto-synced from an Ultrahuman ring (Settings → Ultrahuman; best-effort, falls back to manual).
+- **Fellowship** — accountability with friends. Forge a share code, trade codes, and see each other's
+  rank, XP, streaks, today's ritual/quest progress and sleep score. Stats publish automatically on
+  change. Backend: three capability-code RPCs on the `odin-claude-brain` Supabase project
+  (`mimir_create_profile` / `mimir_publish` / `mimir_get_profile`); the table is RLS-locked, the share
+  code is the read capability and a separate secret is the write capability. Only saga stats sync —
+  tasks, notes, calendar stay in the browser.
+- **Reminders** — browser notifications at each dusk anchor (18:30 stop eating…) and at day-start for
+  the morning ritual, while a Mimir tab is open.
 - `⌘K` command palette searches everything; `1–7` switch pages; `?` shows all shortcuts
 
 ## Tests

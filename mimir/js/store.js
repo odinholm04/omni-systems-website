@@ -22,6 +22,8 @@ const defaults = () => ({
   goals: [],       // {id,year,quarter,theme,why,priorities:[{id,title,metric,tag,done}]}
   habits: {        // The Daily Saga — morning + night rituals (sourced from the Notion brain)
     bedtime: '21:30',
+    morningName: 'Dawn ritual',
+    nightName: 'Dusk ritual',
     morning: [
       'Wake up', 'No phone', '10-minute morning walk', 'Back home',
       '12-minute mobility session', 'Shower — 25 push-ups while water warms up',
@@ -34,8 +36,11 @@ const defaults = () => ({
       { offsetMin: 30, title: 'Journal · calming music · magnesium' },
       { offsetMin: 0, title: 'Lights out' },
     ],
-    log: {},       // ymd -> {m:[stepIdx…], n:[stepIdx…]}
+    log: {},       // ymd -> {m:[stepIdx…], n:[stepIdx…], q:[questId…]}
   },
+  quests: [],      // custom goals: {id,title,type:'check'|'metric',metric,op,target,createdAt}
+  metrics: {},     // ymd -> {sleepScore, sleepHours, source:'manual'|'ultrahuman'}
+  sync: { code: null, secret: null, friends: [], autoPublish: true }, // Fellowship
   days: {},        // ymd -> {planned:[taskIds], plannedAt, shutdownAt, reflection}
   weeks: {},       // monday-ymd -> {objectives:[{id,title,done}], reflection, reviewedAt}
   focus: null,     // active session {taskId,mode,plannedMin,startedAt,pausedAt,accumMs,breakUntil}
@@ -54,6 +59,7 @@ function load() {
       ...defaults(), ...data,
       settings: { ...defaults().settings, ...(data.settings || {}) },
       habits: { ...defaults().habits, ...(data.habits || {}) },
+      sync: { ...defaults().sync, ...(data.sync || {}) },
     };
   } catch (e) {
     console.error('Mimir: failed to load state, starting fresh', e);
@@ -128,6 +134,7 @@ export function importJson(json) {
     ...defaults(), ...data,
     settings: { ...defaults().settings, ...(data.settings || {}) },
     habits: { ...defaults().habits, ...(data.habits || {}) },
+    sync: { ...defaults().sync, ...(data.sync || {}) },
   };
   localStorage.setItem(KEY, JSON.stringify(state));
   listeners.forEach(fn => fn());
@@ -312,7 +319,8 @@ export const RANKS = [
 
 export function habitLog(date) {
   const h = state.habits;
-  if (!h.log[date]) h.log[date] = { m: [], n: [] };
+  if (!h.log[date]) h.log[date] = { m: [], n: [], q: [] };
+  if (!h.log[date].q) h.log[date].q = [];
   return h.log[date];
 }
 export function toggleHabitStep(date, which, idx) {
@@ -334,14 +342,56 @@ export function ritualDone(date, which) {
 }
 export const perfectDay = date => ritualDone(date, 'm') && ritualDone(date, 'n');
 
-// XP: 5 per step, +20 per completed ritual, +30 for a perfect day.
+// ---------- quests (custom goals — checkbox or metric-driven) ----------
+export function addQuest(patch) {
+  const q = { id: uid(), title: '', type: 'check', metric: 'sleepScore', op: '>=', target: 85, createdAt: Date.now(), ...patch };
+  state.quests.push(q); save(); return q;
+}
+export function updateQuest(id, patch) {
+  const q = state.quests.find(x => x.id === id);
+  if (q) { Object.assign(q, patch); save(); }
+  return q;
+}
+export function deleteQuest(id) {
+  state.quests = state.quests.filter(x => x.id !== id);
+  Object.values(state.habits.log).forEach(l => { if (l.q) l.q = l.q.filter(x => x !== id); });
+  save();
+}
+export function toggleQuest(date, id) {
+  const l = habitLog(date);
+  const i = l.q.indexOf(id);
+  if (i >= 0) l.q.splice(i, 1); else l.q.push(id);
+  save();
+}
+export function setMetrics(date, patch) {
+  state.metrics[date] = { ...(state.metrics[date] || {}), ...patch };
+  save();
+}
+// A metric quest evaluates automatically from that day's metrics; a check quest from the log.
+export function questDone(q, date) {
+  if (q.type === 'check') return (state.habits.log[date]?.q || []).includes(q.id);
+  const m = state.metrics[date];
+  const v = m ? m[q.metric] : undefined;
+  if (v === undefined || v === null) return false;
+  return q.op === '>=' ? v >= q.target : v <= q.target;
+}
+export function questsDoneCount(date) {
+  return state.quests.filter(q => questDone(q, date)).length;
+}
+
+// XP: 5 per ritual step, +20 per completed ritual, +30 for a perfect day, +10 per quest-day.
 export function habitXp() {
   let xp = 0;
-  Object.keys(state.habits.log).forEach(d => {
-    xp += (checkedCount(state.habits.log[d], 'm') + checkedCount(state.habits.log[d], 'n')) * 5;
-    if (ritualDone(d, 'm')) xp += 20;
-    if (ritualDone(d, 'n')) xp += 20;
-    if (perfectDay(d)) xp += 30;
+  const dates = new Set([...Object.keys(state.habits.log), ...Object.keys(state.metrics)]);
+  dates.forEach(d => {
+    const l = state.habits.log[d];
+    if (l) {
+      xp += (checkedCount(l, 'm') + checkedCount(l, 'n')) * 5;
+      if (ritualDone(d, 'm')) xp += 20;
+      if (ritualDone(d, 'n')) xp += 20;
+      if (perfectDay(d)) xp += 30;
+    }
+    xp += questsDoneCount(d) * 10;
   });
   return xp;
 }

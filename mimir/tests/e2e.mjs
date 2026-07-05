@@ -498,6 +498,133 @@ await page.reload(); await sleep(300);
 st = await getState();
 check('ritual log persists', st.habits.log[today].m.length === 11 && st.habits.log[today].n.length === 5);
 
+// ---------------------------------------------------------------- 17. quests, sleep automation, editable rituals
+console.log('\n17. Quests & sleep-metric automation');
+await page.goto(BASE + '#/rituals'); await sleep(250);
+
+// rename rituals (shareable with a friend's own goals)
+await page.click('#rt-edit'); await sleep(200);
+await page.fill('#re-mname', 'Gummi morning');
+await page.click('#re-save'); await flush();
+check('ritual name editable', (await page.textContent('#view')).includes('Gummi morning'));
+
+// manual check quest
+await page.click('#rt-addq'); await sleep(200);
+await page.fill('#qm-title', 'Read 10 pages');
+await page.click('#qm-save'); await flush();
+st = await getState();
+const rq = st.quests.find(q => q.title === 'Read 10 pages');
+check('check-quest created', !!rq && rq.type === 'check');
+const xpBeforeQuest = st.habits ? await page.evaluate(() => document.querySelector('.rank-xp').textContent) : '';
+await page.click(`[data-quest-toggle="${rq.id}"]`); await flush();
+st = await getState();
+check('quest checked for today', st.habits.log[today].q.includes(rq.id));
+const xpAfterQuest = await page.evaluate(() => document.querySelector('.rank-xp').textContent);
+check('quest adds +10 XP', parseInt(xpAfterQuest) === parseInt(xpBeforeQuest) + 10, `${xpBeforeQuest} → ${xpAfterQuest}`);
+
+// automatic metric quest: sleep score >= 85
+await page.click('#rt-addq'); await sleep(200);
+await page.fill('#qm-title', 'Sleep like a king');
+await page.selectOption('#qm-type', 'metric'); await sleep(100);
+await page.selectOption('#qm-metric', 'sleepScore');
+await page.fill('#qm-target', '85');
+await page.click('#qm-save'); await flush();
+check('metric quest shows no data yet', (await page.textContent('#view')).includes('no data yet'));
+st = await getState();
+const mq = st.quests.find(q => q.title === 'Sleep like a king');
+check('metric quest stored', !!mq && mq.type === 'metric' && mq.target === 85);
+
+// log sleep below target → not met
+await page.click('#rt-sleep'); await sleep(200);
+await page.fill('#sl-score', '70'); await page.fill('#sl-hours', '6.5');
+await page.click('#sl-save'); await flush();
+st = await getState();
+check('sleep metrics stored', st.metrics[today].sleepScore === 70 && st.metrics[today].sleepHours === 6.5);
+const lowRow = await page.evaluate(() =>
+  [...document.querySelectorAll('.ritual-step')].find(r => r.textContent.includes('Sleep like a king'))?.className);
+check('below-target quest NOT met', !(lowRow || '').includes('done') && (await page.textContent('#view')).includes('today 70'));
+// re-log above target → auto-met
+await page.click('#rt-sleep'); await sleep(200);
+await page.fill('#sl-score', '91');
+await page.click('#sl-save'); await flush();
+await sleep(150);
+const questRow = await page.evaluate(() =>
+  [...document.querySelectorAll('.ritual-step')].find(r => r.textContent.includes('Sleep like a king'))?.className);
+check('above-target quest auto-met', (questRow || '').includes('done'));
+check('sleep score shows in saga bar', (await page.textContent('.saga-streaks')).includes('😴 91'));
+
+// ---------------------------------------------------------------- 18. fellowship (stubbed sync server)
+console.log('\n18. Fellowship — friends & accountability');
+const FRIEND_CODE = '11111111-2222-4333-8444-555566667777';
+let published = null;
+await page.route('**/rest/v1/rpc/**', async route => {
+  const url = route.request().url();
+  const body = JSON.parse(route.request().postData() || '{}');
+  if (url.includes('mimir_create_profile')) {
+    await route.fulfill({ json: [{ share_code: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeffff0000', secret: '99999999-8888-4777-8666-555544443333' }] });
+  } else if (url.includes('mimir_publish')) {
+    published = body;
+    await route.fulfill({ json: true });
+  } else if (url.includes('mimir_get_profile')) {
+    await route.fulfill({ json: [{
+      name: 'Gummi',
+      data: { v: 1, rank: 'Víkingr', xp: 1800, streaks: { m: 5, n: 3, p: 2 },
+        today: { date: today, m: '4/6', n: '1/4', q: '1/2', perfect: false }, sleep: { score: 88, hours: 7.9 } },
+      updated_at: new Date().toISOString(),
+    }] });
+  } else await route.continue();
+});
+
+await page.goto(BASE + '#/rituals'); await sleep(250);
+await page.click('#fw-forge'); await sleep(400);
+st = await getState();
+check('share code forged & stored', st.sync.code === 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeffff0000');
+check('secret stored locally', st.sync.secret === '99999999-8888-4777-8666-555544443333');
+check('code displayed for sharing', (await page.textContent('#fw-code')).includes('aaaaaaaa'));
+
+await page.fill('#fw-input', FRIEND_CODE);
+await page.click('#fw-add'); await sleep(400);
+st = await getState();
+check('friend added', st.sync.friends.length === 1 && st.sync.friends[0].name === 'Gummi');
+const fwText = await page.textContent('#fellowship-card');
+check('friend rank + XP visible', fwText.includes('Víkingr') && fwText.includes('1800 XP'));
+check('friend today progress visible', fwText.includes('4/6') && fwText.includes('1/4'));
+check('friend streaks visible', fwText.includes('☀5d'));
+check('friend sleep score visible', fwText.includes('😴 88'));
+
+// auto-publish fires on changes (debounced 2.5s)
+published = null;
+await page.click('[data-step="m:0"]'); await sleep(3500);
+check('auto-publish sends payload after change', !!published && !!published.p_data);
+check('published payload has secret + stats', published && published.p_secret === st.sync.secret && typeof published.p_data.xp === 'number');
+check('published payload includes sleep', published && published.p_data.sleep && published.p_data.sleep.score === 91);
+
+// duplicate / own-code guards
+await page.fill('#fw-input', FRIEND_CODE);
+await page.click('#fw-add'); await sleep(300);
+check('duplicate friend rejected', (await getState()).sync.friends.length === 1);
+
+// ---------------------------------------------------------------- 19. reminders
+console.log('\n19. Ritual reminders');
+await ctx.grantPermissions(['notifications'], { origin: new URL(BASE).origin });
+// set bedtime so that one dusk anchor is exactly now, enable reminders
+await page.evaluate(() => {
+  const d = JSON.parse(localStorage.getItem('mimir.data.v1'));
+  d.settings.reminders = true;
+  const now = new Date();
+  const bedMin = now.getHours() * 60 + now.getMinutes() + 60; // anchor "no screens" (60 off) = now
+  d.habits.bedtime = `${String(Math.floor((bedMin % 1440) / 60)).padStart(2, '0')}:${String(bedMin % 60).padStart(2, '0')}`;
+  d.habits.log[new Date().toISOString().slice(0,10)].n = []; // ensure unchecked
+  localStorage.setItem('mimir.data.v1', JSON.stringify(d));
+  localStorage.removeItem('mimir.notified.v1');
+});
+await page.reload(); await sleep(500);
+const fired = await page.evaluate(() => window.__mimirReminderCheck());
+check('reminder fires at dusk anchor', Array.isArray(fired) && fired.some(k => k.startsWith('n')), JSON.stringify(fired));
+const fired2 = await page.evaluate(() => window.__mimirReminderCheck());
+check('reminder fires only once', Array.isArray(fired2) && fired2.length === 0);
+await page.unroute('**/rest/v1/rpc/**');
+
 // ---------------------------------------------------------------- done
 console.log(`\n${'='.repeat(50)}\n${passed} passed, ${failed} failed`);
 if (failures.length) { console.log('\nFailures:'); failures.forEach(f => console.log('  ✗ ' + f)); }

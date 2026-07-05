@@ -295,9 +295,69 @@ document.getElementById('mini-focus').onclick = () => navigate('focus');
 // ---------- focus ticker (global, keeps mini timer + title fresh) ----------
 setInterval(() => focusTick(), 1000);
 
+// ---------- ritual reminders (fire while a Mimir tab is open) ----------
+const NOTIFIED_KEY = 'mimir.notified.v1';
+function notifiedMap() {
+  try { return JSON.parse(localStorage.getItem(NOTIFIED_KEY)) || {}; } catch { return {}; }
+}
+function markNotified(date, key) {
+  const m = notifiedMap();
+  m[date] = m[date] || {};
+  m[date][key] = true;
+  Object.keys(m).forEach(d => { if (d !== date) delete m[d]; }); // keep only today
+  localStorage.setItem(NOTIFIED_KEY, JSON.stringify(m));
+}
+function notify(title, body) {
+  try {
+    if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      new Notification(title, { body, icon: '../icon.svg' });
+    }
+  } catch (e) { /* headless / unsupported */ }
+  toast(`${title}${body ? ' — ' + body : ''}`, 'warn');
+}
+export function reminderCheck(now = new Date()) {
+  const st = store.get();
+  if (!st.settings.reminders) return [];
+  const t = todayYmd();
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const seen = notifiedMap()[t] || {};
+  const fired = [];
+  const win = (anchor) => cur >= anchor && cur < anchor + 15; // 15-min firing window
+
+  // morning ritual at day start
+  const dayStart = st.settings.dayStart.split(':').reduce((h, m) => +h * 60 + +m);
+  if (!seen['m'] && win(dayStart) && !store.ritualDone(t, 'm')) {
+    notify(`☀ ${st.habits.morningName}`, `The saga starts now: ${st.habits.morning[0] || ''}`);
+    markNotified(t, 'm'); fired.push('m');
+  }
+  // each dusk anchor
+  const bed = st.habits.bedtime.split(':').reduce((h, m) => +h * 60 + +m);
+  const log = store.habitLog(t);
+  st.habits.night.forEach((s, i) => {
+    const anchor = bed - s.offsetMin;
+    if (!seen['n' + i] && win(anchor) && !log.n.includes(i)) {
+      notify(`☾ ${st.habits.nightName}`, s.title);
+      markNotified(t, 'n' + i); fired.push('n' + i);
+    }
+  });
+  return fired;
+}
+window.__mimirReminderCheck = reminderCheck; // exposed for tests
+setInterval(() => reminderCheck(), 30000);
+setTimeout(() => reminderCheck(), 2500);
+
 // ---------- boot ----------
 window.addEventListener('hashchange', renderApp);
 store.onChange(() => updateBadges());
+// Fellowship auto-publish: any saved change refreshes your published saga stats (debounced).
+import('./sync.js').then(sync => store.onChange(() => sync.schedulePublish()));
+// Ultrahuman auto-sync: once per day on boot if the ring is configured and no data yet.
+import('./metrics.js').then(({ fetchUltrahuman }) => {
+  const s = store.get();
+  if (s.settings.uhKey && s.settings.uhEmail && !s.metrics[todayYmd()]) {
+    fetchUltrahuman().then(r => toast(`◉ Ring synced: sleep score ${r.sleepScore ?? '—'}`, 'success')).catch(() => {});
+  }
+});
 applyTheme();
 if (!location.hash) location.hash = '#/today';
 renderApp();

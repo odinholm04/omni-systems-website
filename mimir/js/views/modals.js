@@ -160,6 +160,12 @@ export function openSettingsModal() {
       <label>Daily deep-work goal (minutes)<input type="number" id="st-goal" min="30" step="15" value="${s.focusGoalMin}"></label>
     </div>
     <div class="form-row"><label style="flex:100%">Shutdown phrase<input id="st-phrase" value="${escapeHtml(s.shutdownPhrase)}"></label></div>
+    <h2 style="margin-top:20px">Ultrahuman ring</h2>
+    <p class="muted" style="font-size:12.5px">Optional — auto-fills your sleep score each morning so automatic quests judge themselves. Get a Partner API key from Ultrahuman support, then Mimir fetches your metrics directly (data stays in your browser).</p>
+    <div class="form-row">
+      <label>Account email<input id="st-uhemail" type="email" value="${escapeHtml(s.uhEmail || '')}" placeholder="you@example.com"></label>
+      <label>Partner API key<input id="st-uhkey" type="password" value="${escapeHtml(s.uhKey || '')}" placeholder="uh_…"></label>
+    </div>
     <h2 style="margin-top:20px">Data</h2>
     <p class="muted" style="font-size:13px">Everything lives in this browser's local storage. Export a backup regularly — it's a plain JSON file you can re-import anywhere.</p>
     <div class="modal-foot" style="margin-top:8px">
@@ -183,6 +189,8 @@ export function openSettingsModal() {
       capacityHours: Number(box.querySelector('#st-cap').value) || 8,
       focusGoalMin: Number(box.querySelector('#st-goal').value) || 180,
       shutdownPhrase: box.querySelector('#st-phrase').value,
+      uhEmail: box.querySelector('#st-uhemail').value.trim(),
+      uhKey: box.querySelector('#st-uhkey').value.trim(),
     });
     document.documentElement.dataset.theme = s.theme;
     store.save(); closeModal(); renderApp(); toast('Settings saved', 'success');

@@ -1,0 +1,216 @@
+// Mimir — task / event / settings modals.
+import * as store from '../store.js';
+import { escapeHtml, todayYmd, minutesToHM } from '../utils.js';
+import { showModal, closeModal, renderApp, toast } from '../app.js';
+import { startFocusOnTask } from './focus.js';
+
+export function openTaskModal(id = null) {
+  const t = id ? store.task(id) : null;
+  const isNew = !t;
+  const v = t || store.newTask();
+  const goals = store.get().goals;
+  const goalOptions = goals.flatMap(g =>
+    g.priorities.map(p => `<option value="${g.id}|${p.id}" ${v.goalId === g.id && v.goalPriorityId === p.id ? 'selected' : ''}>Q${g.quarter} · ${escapeHtml(p.title)}</option>`));
+
+  const box = showModal(`
+    <h2>${isNew ? 'New task' : 'Edit task'}</h2>
+    <div class="form-row"><label style="flex:100%">Title
+      <input id="tm-title" value="${escapeHtml(v.title)}" placeholder="What needs doing?"></label></div>
+    <div class="form-row">
+      <label>Status<select id="tm-status">
+        <option value="todo" ${v.status === 'todo' ? 'selected' : ''}>Not started</option>
+        <option value="doing" ${v.status === 'doing' ? 'selected' : ''}>In progress</option>
+        <option value="done" ${v.status === 'done' ? 'selected' : ''}>Completed</option>
+      </select></label>
+      <label>Priority<select id="tm-prio">
+        <option value="high" ${v.priority === 'high' ? 'selected' : ''}>High</option>
+        <option value="normal" ${v.priority === 'normal' ? 'selected' : ''}>Normal</option>
+        <option value="low" ${v.priority === 'low' ? 'selected' : ''}>Low</option>
+        <option value="min" ${v.priority === 'min' ? 'selected' : ''}>Minimal</option>
+      </select></label>
+      <label>Project<input id="tm-project" value="${escapeHtml(v.project || '')}" placeholder="loki, omni…" list="tm-projects">
+        <datalist id="tm-projects">${store.projects().map(p => `<option value="${escapeHtml(p)}">`).join('')}</datalist></label>
+    </div>
+    <div class="form-row">
+      <label>Scheduled<input type="date" id="tm-date" value="${v.scheduled || ''}"></label>
+      <label>Time<input type="time" id="tm-time" value="${v.time || ''}"></label>
+      <label>Estimate (min)<input type="number" id="tm-est" min="5" step="5" value="${v.estimateMin || ''}" placeholder="30"></label>
+    </div>
+    <div class="form-row">
+      <label>Tags (comma separated)<input id="tm-tags" value="${escapeHtml(v.tags.join(', '))}" placeholder="video, edit"></label>
+      <label>Quarterly priority<select id="tm-goal"><option value="">— none —</option>${goalOptions.join('')}</select></label>
+    </div>
+    <div class="form-row"><label style="flex:100%">Notes
+      <textarea id="tm-notes" rows="3" placeholder="Details, links…">${escapeHtml(v.notes)}</textarea></label></div>
+    ${!isNew && store.actualMin(v.id) ? `<p class="muted" style="font-size:12.5px">⏱ ${minutesToHM(store.actualMin(v.id))} of focused time logged on this task.</p>` : ''}
+    <div class="modal-foot">
+      ${!isNew ? `<button class="btn danger" id="tm-delete">Delete</button>
+      <button class="btn" id="tm-focus">▶ Focus on this</button>` : ''}
+      <span class="spacer"></span>
+      <button class="btn" id="tm-cancel">Cancel</button>
+      <button class="btn primary" id="tm-save">${isNew ? 'Add task' : 'Save'}</button>
+    </div>`);
+
+  box.querySelector('#tm-title').focus();
+  const collect = () => ({
+    title: box.querySelector('#tm-title').value.trim(),
+    status: box.querySelector('#tm-status').value,
+    priority: box.querySelector('#tm-prio').value,
+    project: box.querySelector('#tm-project').value.trim().toLowerCase() || null,
+    scheduled: box.querySelector('#tm-date').value || null,
+    time: box.querySelector('#tm-time').value || null,
+    estimateMin: Number(box.querySelector('#tm-est').value) || null,
+    tags: box.querySelector('#tm-tags').value.split(',').map(s => s.trim().toLowerCase()).filter(Boolean),
+    notes: box.querySelector('#tm-notes').value,
+  });
+
+  box.querySelector('#tm-save').onclick = () => {
+    const patch = collect();
+    if (!patch.title) { toast('Title required', 'warn'); return; }
+    const gv = box.querySelector('#tm-goal').value;
+    patch.goalId = gv ? gv.split('|')[0] : null;
+    patch.goalPriorityId = gv ? gv.split('|')[1] : null;
+    if (patch.scheduled) patch.inbox = false;
+    if (patch.status === 'done' && (!t || t.status !== 'done')) patch.completedAt = Date.now();
+    if (patch.status !== 'done') patch.completedAt = null;
+    if (isNew) store.addTask({ ...patch, inbox: !patch.scheduled });
+    else store.updateTask(id, patch);
+    closeModal(); renderApp();
+  };
+  box.querySelector('#tm-cancel').onclick = closeModal;
+  if (!isNew) {
+    box.querySelector('#tm-delete').onclick = () => { store.deleteTask(id); closeModal(); renderApp(); toast('Task deleted'); };
+    box.querySelector('#tm-focus').onclick = () => { closeModal(); startFocusOnTask(id); };
+  }
+  box.querySelector('#tm-title').addEventListener('keydown', e => {
+    if (e.key === 'Enter') box.querySelector('#tm-save').click();
+  });
+}
+
+export function openEventModal(id = null, defaults = {}) {
+  const ev = id ? store.event(id) : null;
+  const isNew = !ev;
+  const v = ev || { title: '', date: todayYmd(), start: '09:00', end: '10:00', kind: 'event', notes: '', taskIds: [], ...defaults };
+  const openTasks = store.get().tasks.filter(t => t.status !== 'done');
+
+  const box = showModal(`
+    <h2>${isNew ? 'New event / timeblock' : 'Edit event'}</h2>
+    <div class="form-row"><label style="flex:100%">Title
+      <input id="em-title" value="${escapeHtml(v.title)}" placeholder="Deep work: Lydia pipeline"></label></div>
+    <div class="form-row">
+      <label>Type<select id="em-kind">
+        <option value="event" ${v.kind === 'event' ? 'selected' : ''}>Event / meeting</option>
+        <option value="deepwork" ${v.kind === 'deepwork' ? 'selected' : ''}>Deep work block</option>
+        <option value="shallow" ${v.kind === 'shallow' ? 'selected' : ''}>Shallow work block</option>
+        <option value="personal" ${v.kind === 'personal' ? 'selected' : ''}>Personal</option>
+      </select></label>
+      <label>Date<input type="date" id="em-date" value="${v.date}"></label>
+      <label>Start<input type="time" id="em-start" value="${v.start}"></label>
+      <label>End<input type="time" id="em-end" value="${v.end}"></label>
+    </div>
+    <div class="form-row"><label style="flex:100%">Linked task (worked on during this block)
+      <select id="em-task"><option value="">— none —</option>
+      ${openTasks.map(t => `<option value="${t.id}" ${(v.taskIds || [])[0] === t.id ? 'selected' : ''}>${escapeHtml(t.title)}</option>`).join('')}
+      </select></label></div>
+    <div class="form-row"><label style="flex:100%">Notes
+      <textarea id="em-notes" rows="2">${escapeHtml(v.notes || '')}</textarea></label></div>
+    <div class="modal-foot">
+      ${!isNew ? '<button class="btn danger" id="em-delete">Delete</button>' : ''}
+      <span class="spacer"></span>
+      <button class="btn" id="em-cancel">Cancel</button>
+      <button class="btn primary" id="em-save">${isNew ? 'Add' : 'Save'}</button>
+    </div>`);
+
+  box.querySelector('#em-title').focus();
+  box.querySelector('#em-save').onclick = () => {
+    const patch = {
+      title: box.querySelector('#em-title').value.trim() || 'Untitled block',
+      kind: box.querySelector('#em-kind').value,
+      date: box.querySelector('#em-date').value || todayYmd(),
+      start: box.querySelector('#em-start').value || '09:00',
+      end: box.querySelector('#em-end').value || '10:00',
+      taskIds: box.querySelector('#em-task').value ? [box.querySelector('#em-task').value] : [],
+      notes: box.querySelector('#em-notes').value,
+    };
+    if (patch.end <= patch.start) { toast('End must be after start', 'warn'); return; }
+    if (isNew) store.addEvent(patch); else store.updateEvent(id, patch);
+    closeModal(); renderApp();
+  };
+  box.querySelector('#em-cancel').onclick = closeModal;
+  if (!isNew) box.querySelector('#em-delete').onclick = () => { store.deleteEvent(id); closeModal(); renderApp(); };
+}
+
+export function openSettingsModal() {
+  const s = store.get().settings;
+  const box = showModal(`
+    <h2>Settings</h2>
+    <div class="form-row">
+      <label>Your name<input id="st-name" value="${escapeHtml(s.name)}"></label>
+      <label>Theme<select id="st-theme">
+        <option value="dark" ${s.theme === 'dark' ? 'selected' : ''}>Dark</option>
+        <option value="light" ${s.theme === 'light' ? 'selected' : ''}>Light</option>
+      </select></label>
+    </div>
+    <div class="form-row">
+      <label>Day starts<input type="time" id="st-start" value="${s.dayStart}"></label>
+      <label>Day ends (target shutdown)<input type="time" id="st-end" value="${s.dayEnd}"></label>
+    </div>
+    <div class="form-row">
+      <label>Daily capacity (hours of planned work)<input type="number" id="st-cap" min="1" max="16" step="0.5" value="${s.capacityHours}"></label>
+      <label>Daily deep-work goal (minutes)<input type="number" id="st-goal" min="30" step="15" value="${s.focusGoalMin}"></label>
+    </div>
+    <div class="form-row"><label style="flex:100%">Shutdown phrase<input id="st-phrase" value="${escapeHtml(s.shutdownPhrase)}"></label></div>
+    <h2 style="margin-top:20px">Data</h2>
+    <p class="muted" style="font-size:13px">Everything lives in this browser's local storage. Export a backup regularly — it's a plain JSON file you can re-import anywhere.</p>
+    <div class="modal-foot" style="margin-top:8px">
+      <button class="btn" id="st-export">⬇ Export backup</button>
+      <button class="btn" id="st-import">⬆ Import backup</button>
+      <input type="file" id="st-file" accept=".json,application/json" hidden>
+      <button class="btn danger" id="st-reset">Reset all data</button>
+    </div>
+    <div class="modal-foot">
+      <span class="spacer"></span>
+      <button class="btn" id="st-cancel">Cancel</button>
+      <button class="btn primary" id="st-save">Save settings</button>
+    </div>`);
+
+  box.querySelector('#st-save').onclick = () => {
+    Object.assign(s, {
+      name: box.querySelector('#st-name').value.trim() || 'Friend',
+      theme: box.querySelector('#st-theme').value,
+      dayStart: box.querySelector('#st-start').value || '07:00',
+      dayEnd: box.querySelector('#st-end').value || '18:00',
+      capacityHours: Number(box.querySelector('#st-cap').value) || 8,
+      focusGoalMin: Number(box.querySelector('#st-goal').value) || 180,
+      shutdownPhrase: box.querySelector('#st-phrase').value,
+    });
+    document.documentElement.dataset.theme = s.theme;
+    store.save(); closeModal(); renderApp(); toast('Settings saved', 'success');
+  };
+  box.querySelector('#st-cancel').onclick = closeModal;
+  box.querySelector('#st-export').onclick = () => {
+    const blob = new Blob([store.exportJson()], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `mimir-backup-${todayYmd()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('Backup downloaded', 'success');
+  };
+  box.querySelector('#st-import').onclick = () => box.querySelector('#st-file').click();
+  box.querySelector('#st-file').onchange = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try { store.importJson(r.result); closeModal(); renderApp(); toast('Backup imported', 'success'); }
+      catch (err) { toast('Import failed: ' + escapeHtml(err.message), 'warn'); }
+    };
+    r.readAsText(f);
+  };
+  box.querySelector('#st-reset').onclick = () => {
+    if (confirm('Reset ALL Mimir data in this browser? This cannot be undone.')) {
+      store.resetAll(); closeModal(); renderApp();
+    }
+  };
+}

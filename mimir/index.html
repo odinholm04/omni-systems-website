@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mimir — your unified brain</title>
+  <meta name="description" content="Mimir: tasks, calendar, notes and deep work — all connected. The personal productivity system of Omni.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="../icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="app">
+    <aside id="sidebar">
+      <div class="brand">
+        <div class="brand-mark">ᛗ</div>
+        <div>
+          <div class="brand-name">MIMIR</div>
+          <div class="brand-sub">unified brain</div>
+        </div>
+      </div>
+
+      <nav id="nav">
+        <a href="#/today" data-nav="today"><span class="nav-key">1</span>Today</a>
+        <a href="#/tasks" data-nav="tasks"><span class="nav-key">2</span>Tasks <span class="nav-badge" id="inbox-badge" hidden></span></a>
+        <a href="#/calendar" data-nav="calendar"><span class="nav-key">3</span>Calendar</a>
+        <a href="#/notes" data-nav="notes"><span class="nav-key">4</span>Notes</a>
+        <a href="#/focus" data-nav="focus"><span class="nav-key">5</span>Focus</a>
+        <a href="#/goals" data-nav="goals"><span class="nav-key">6</span>Goals</a>
+        <a href="#/insights" data-nav="insights"><span class="nav-key">7</span>Insights</a>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div id="mini-focus" hidden>
+          <div class="mini-focus-time" id="mini-focus-time">00:00</div>
+          <div class="mini-focus-task" id="mini-focus-task"></div>
+        </div>
+        <button class="btn ghost small" id="btn-palette" title="Command palette (⌘K)">⌘K — anything</button>
+        <button class="btn ghost small" id="btn-settings">Settings</button>
+      </div>
+    </aside>
+
+    <main id="view" tabindex="-1"><!-- views render here --></main>
+  </div>
+
+  <!-- Quick add -->
+  <div class="overlay" id="quickadd-overlay" hidden>
+    <div class="sheet quickadd">
+      <input id="quickadd-input" placeholder="Capture anything…  e.g. Edit Lydia video tomorrow 10am @loki !high for 45m" autocomplete="off">
+      <div class="quickadd-hints" id="quickadd-preview"></div>
+      <div class="quickadd-help">
+        <span><b>#tag</b> tag</span><span><b>@name</b> project</span><span><b>!high / !low</b> priority</span>
+        <span><b>tomorrow · fri · jul 12</b> date</span><span><b>10am</b> time</span><span><b>for 45m</b> estimate</span>
+        <span class="right"><b>↵</b> add · <b>⇧↵</b> add to inbox · <b>esc</b> close</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command palette -->
+  <div class="overlay" id="palette-overlay" hidden>
+    <div class="sheet palette">
+      <input id="palette-input" placeholder="Type a command or search everything…" autocomplete="off">
+      <div id="palette-results"></div>
+    </div>
+  </div>
+
+  <!-- Generic modal -->
+  <div class="overlay" id="modal-overlay" hidden>
+    <div class="sheet modal" id="modal-box"></div>
+  </div>
+
+  <div id="toasts"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// Mimir — Notes: markdown notes with wiki-links, tags, daily notes.
+// Snotra — Notes: markdown notes with wiki-links, tags, daily notes.
 import * as store from '../store.js';
 import { escapeHtml, renderMarkdown, toggleMdCheckbox, debounce, todayYmd, fmtDate } from '../utils.js';
 import { navigate, toast } from '../app.js';

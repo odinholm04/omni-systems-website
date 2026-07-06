@@ -1,4 +1,4 @@
-// Mimir — Calendar: month + week (timeblocking) views.
+// Snotra — Calendar: month + week (timeblocking) views.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, ymd, fromYmd, addDays, startOfWeek, timeToMin, minToTime, minutesToHM, fmtDate } from '../utils.js';
 import { renderApp } from '../app.js';

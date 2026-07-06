@@ -1,4 +1,4 @@
-// Mimir — Goals: rolling quarterly planning (theme + 2-4 priorities, linked to tasks).
+// Snotra — Goals: rolling quarterly planning (theme + 2-4 priorities, linked to tasks).
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, quarterOf, uid } from '../utils.js';
 import { renderApp, toast } from '../app.js';

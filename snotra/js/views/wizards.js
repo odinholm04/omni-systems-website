@@ -1,4 +1,4 @@
-// Mimir — guided rituals: Plan My Day, Triage Inbox, Shutdown, Weekly Review.
+// Snotra — guided rituals: Plan My Day, Triage Inbox, Shutdown, Weekly Review.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, addDays, fmtDate, minutesToHM, startOfWeek, uid, minToTime, timeToMin } from '../utils.js';
 import { showModal, closeModal, renderApp, toast } from '../app.js';

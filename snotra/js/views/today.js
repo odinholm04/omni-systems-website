@@ -1,4 +1,4 @@
-// Mimir — Today: the daily command center.
+// Snotra — Today: the daily command center.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, fmtDate, minutesToHM, timeToMin } from '../utils.js';
 import { toast, renderApp } from '../app.js';

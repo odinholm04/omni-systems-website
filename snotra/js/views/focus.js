@@ -1,4 +1,4 @@
-// Mimir — Focus: deep work timer bound to tasks, distraction parking, session log.
+// Snotra — Focus: deep work timer bound to tasks, distraction parking, session log.
 import * as store from '../store.js';
 import { escapeHtml, minutesToHM, todayYmd } from '../utils.js';
 import { navigate, renderApp, toast, currentRoute } from '../app.js';
@@ -167,7 +167,7 @@ export function focusTick() {
   const mini = document.getElementById('mini-focus');
   if (!f) {
     mini.hidden = true;
-    if (document.title !== 'Mimir — your unified brain') document.title = 'Mimir — your unified brain';
+    if (document.title !== 'Snotra — your unified brain') document.title = 'Snotra — your unified brain';
     notified = false;
     return;
   }
@@ -179,7 +179,7 @@ export function focusTick() {
   document.getElementById('mini-focus-time').textContent = str;
   const task = f.taskId ? store.task(f.taskId) : null;
   document.getElementById('mini-focus-task').textContent = task ? task.title : 'deep work';
-  document.title = `${str} · Mimir`;
+  document.title = `${str} · Snotra`;
 
   if (currentRoute === 'focus') {
     const clock = document.getElementById('fc-clock');
@@ -192,7 +192,7 @@ export function focusTick() {
     notified = true;
     chime();
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification('Mimir — block complete', { body: task ? `“${task.title}” block done. Take a real break.` : 'Deep work block done. Take a real break.' });
+      new Notification('Snotra — block complete', { body: task ? `“${task.title}” block done. Take a real break.` : 'Deep work block done. Take a real break.' });
     }
     toast('⏰ Block complete — finish up and take a break', 'warn');
   }

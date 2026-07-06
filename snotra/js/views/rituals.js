@@ -1,4 +1,4 @@
-// Mimir — Rituals: "The Daily Saga". Fully editable morning/night rituals + custom quests,
+// Snotra — Rituals: "The Daily Saga". Fully editable morning/night rituals + custom quests,
 // gamified with XP, Norse ranks, streaks, a rune wall, sleep metrics and a friend Fellowship.
 import * as store from '../store.js';
 import * as sync from '../sync.js';
@@ -298,7 +298,7 @@ function fellowshipHtml(s) {
       <input id="fw-input" placeholder="Paste a friend's share code…" style="flex:1">
       <button class="btn" id="fw-add">+ Add companion</button>
     </div>
-    ${s.friends.length ? s.friends.map(friendHtml).join('') : '<div class="empty">No companions yet — send your code to a friend who has Mimir open at omni-systems.ai/mimir.</div>'}
+    ${s.friends.length ? s.friends.map(friendHtml).join('') : '<div class="empty">No companions yet — send your code to a friend who has Snotra open at omni-systems.ai/snotra.</div>'}
     ${sync.lastError ? `<p class="faint" style="font-size:11px;color:var(--red)">sync: ${escapeHtml(sync.lastError)}</p>` : ''}`;
 }
 
@@ -376,7 +376,7 @@ async function enableReminders() {
   const perm = await Notification.requestPermission();
   if (perm !== 'granted') { toast('Notifications blocked by the browser', 'warn'); return; }
   s.reminders = true; store.save(); renderApp();
-  toast('🔔 Reminders on — Mimir will nudge you at each dusk anchor (keep a tab open)', 'success');
+  toast('🔔 Reminders on — Snotra will nudge you at each dusk anchor (keep a tab open)', 'success');
 }
 
 // ---------- ritual editor ----------
@@ -384,7 +384,7 @@ function openRitualEditor() {
   const h = store.get().habits;
   const box = showModal(`
     <h2>Edit rituals</h2>
-    <p class="muted" style="font-size:12.5px;margin-top:-8px">Make it yours — or hand Mimir to a friend and let them write their own saga.</p>
+    <p class="muted" style="font-size:12.5px;margin-top:-8px">Make it yours — or hand Snotra to a friend and let them write their own saga.</p>
     <div class="form-row">
       <label>Morning ritual name<input id="re-mname" value="${escapeHtml(h.morningName)}"></label>
       <label>Night ritual name<input id="re-nname" value="${escapeHtml(h.nightName)}"></label>

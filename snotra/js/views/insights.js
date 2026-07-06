@@ -1,4 +1,4 @@
-// Mimir — Insights: focus analytics + estimate accuracy. Single-hue charts, direct labels.
+// Snotra — Insights: focus analytics + estimate accuracy. Single-hue charts, direct labels.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, addDays, minutesToHM, startOfWeek } from '../utils.js';
 

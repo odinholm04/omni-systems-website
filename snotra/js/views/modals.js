@@ -1,4 +1,4 @@
-// Mimir — task / event / settings modals.
+// Snotra — task / event / settings modals.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, minutesToHM } from '../utils.js';
 import { showModal, closeModal, renderApp, toast } from '../app.js';
@@ -161,7 +161,7 @@ export function openSettingsModal() {
     </div>
     <div class="form-row"><label style="flex:100%">Shutdown phrase<input id="st-phrase" value="${escapeHtml(s.shutdownPhrase)}"></label></div>
     <h2 style="margin-top:20px">Ultrahuman ring</h2>
-    <p class="muted" style="font-size:12.5px">Optional — auto-fills your sleep score each morning so automatic quests judge themselves. Get a Partner API key from Ultrahuman support, then Mimir fetches your metrics directly (data stays in your browser).</p>
+    <p class="muted" style="font-size:12.5px">Optional — auto-fills your sleep score each morning so automatic quests judge themselves. Get a Partner API key from Ultrahuman support, then Snotra fetches your metrics directly (data stays in your browser).</p>
     <div class="form-row">
       <label>Account email<input id="st-uhemail" type="email" value="${escapeHtml(s.uhEmail || '')}" placeholder="you@example.com"></label>
       <label>Partner API key<input id="st-uhkey" type="password" value="${escapeHtml(s.uhKey || '')}" placeholder="uh_…"></label>
@@ -200,7 +200,7 @@ export function openSettingsModal() {
     const blob = new Blob([store.exportJson()], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `mimir-backup-${todayYmd()}.json`;
+    a.download = `snotra-backup-${todayYmd()}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
     toast('Backup downloaded', 'success');
@@ -217,7 +217,7 @@ export function openSettingsModal() {
     r.readAsText(f);
   };
   box.querySelector('#st-reset').onclick = () => {
-    if (confirm('Reset ALL Mimir data in this browser? This cannot be undone.')) {
+    if (confirm('Reset ALL Snotra data in this browser? This cannot be undone.')) {
       store.resetAll(); closeModal(); renderApp();
     }
   };

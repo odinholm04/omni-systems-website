@@ -1,4 +1,4 @@
-// Mimir — Tasks: inbox / backlog / scheduled, list + kanban views.
+// Snotra — Tasks: inbox / backlog / scheduled, list + kanban views.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, fmtDate } from '../utils.js';
 import { renderApp, openQuickAdd } from '../app.js';

@@ -1,7 +1,7 @@
-# Mimir — your unified brain
+# Snotra — your unified brain
 
 Personal productivity app for Omni: tasks, calendar, notes and deep work — all connected.
-Lives at `omni-systems.ai/mimir`. All data stays in the browser (localStorage); export/import
+Lives at `omni-systems.ai/snotra`. All data stays in the browser (localStorage); export/import
 JSON backups from Settings. No backend, no build step, works offline after first load.
 
 ## The system it encodes
@@ -27,11 +27,11 @@ JSON backups from Settings. No backend, no build step, works offline after first
 - **Fellowship** — accountability with friends. Forge a share code, trade codes, and see each other's
   rank, XP, streaks, today's ritual/quest progress and sleep score. Stats publish automatically on
   change. Backend: three capability-code RPCs on the `odin-claude-brain` Supabase project
-  (`mimir_create_profile` / `mimir_publish` / `mimir_get_profile`); the table is RLS-locked, the share
+  (`snotra_create_profile` / `snotra_publish` / `snotra_get_profile`); the table is RLS-locked, the share
   code is the read capability and a separate secret is the write capability. Only saga stats sync —
   tasks, notes, calendar stay in the browser.
 - **Reminders** — browser notifications at each dusk anchor (18:30 stop eating…) and at day-start for
-  the morning ritual, while a Mimir tab is open.
+  the morning ritual, while a Snotra tab is open.
 - `⌘K` command palette searches everything; `1–7` switch pages; `?` shows all shortcuts
 
 ## Tests
@@ -42,7 +42,7 @@ Full end-to-end suite driving every feature in a real browser:
 cd tests
 npm install playwright
 python3 -m http.server 8931 -d ../..   # serve repo root
-node e2e.mjs http://localhost:8931/mimir/
+node e2e.mjs http://localhost:8931/snotra/
 ```
 
 Optionally set `PW_EXECUTABLE=/path/to/chromium` to use a system browser.

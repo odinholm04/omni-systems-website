@@ -1,4 +1,4 @@
-// Mimir — app shell: routing, global keyboard, quick add, command palette, modals, toasts.
+// Snotra — app shell: routing, global keyboard, quick add, command palette, modals, toasts.
 import * as store from './store.js';
 import { parseQuickAdd, escapeHtml, fmtDate, minutesToHM, fuzzyMatch, todayYmd } from './utils.js';
 import { renderToday } from './views/today.js';
@@ -295,8 +295,8 @@ document.getElementById('mini-focus').onclick = () => navigate('focus');
 // ---------- focus ticker (global, keeps mini timer + title fresh) ----------
 setInterval(() => focusTick(), 1000);
 
-// ---------- ritual reminders (fire while a Mimir tab is open) ----------
-const NOTIFIED_KEY = 'mimir.notified.v1';
+// ---------- ritual reminders (fire while a Snotra tab is open) ----------
+const NOTIFIED_KEY = 'snotra.notified.v1';
 function notifiedMap() {
   try { return JSON.parse(localStorage.getItem(NOTIFIED_KEY)) || {}; } catch { return {}; }
 }
@@ -342,7 +342,7 @@ export function reminderCheck(now = new Date()) {
   });
   return fired;
 }
-window.__mimirReminderCheck = reminderCheck; // exposed for tests
+window.__snotraReminderCheck = reminderCheck; // exposed for tests
 setInterval(() => reminderCheck(), 30000);
 setTimeout(() => reminderCheck(), 2500);
 

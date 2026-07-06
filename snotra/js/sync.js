@@ -1,4 +1,4 @@
-// Mimir — Fellowship sync. Tiny capability-code backend (Supabase RPCs, odin-claude-brain).
+// Snotra — Fellowship sync. Tiny capability-code backend (Supabase RPCs, odin-claude-brain).
 // Your share code lets a friend READ your published saga stats; only your secret can WRITE.
 // Nothing else leaves the browser — tasks, notes and calendar stay local.
 import * as store from './store.js';
@@ -51,7 +51,7 @@ export function buildPayload() {
 export async function forgeShareCode() {
   const s = store.get().sync;
   if (s.code) return s;
-  const rows = await rpc('mimir_create_profile', {
+  const rows = await rpc('snotra_create_profile', {
     p_name: store.get().settings.name, p_data: buildPayload(),
   });
   s.code = rows[0].share_code;
@@ -72,7 +72,7 @@ export async function publishNow() {
   const s = store.get().sync;
   if (!s.code) return false;
   try {
-    const ok = await rpc('mimir_publish', {
+    const ok = await rpc('snotra_publish', {
       p_code: s.code, p_secret: s.secret,
       p_name: store.get().settings.name, p_data: buildPayload(),
     });
@@ -85,7 +85,7 @@ export async function publishNow() {
 }
 
 export async function fetchFriend(code) {
-  const rows = await rpc('mimir_get_profile', { p_code: code });
+  const rows = await rpc('snotra_get_profile', { p_code: code });
   if (!rows || !rows.length) throw new Error('No saga found for that code');
   return rows[0]; // {name, data, updated_at}
 }

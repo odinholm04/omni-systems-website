@@ -1,7 +1,7 @@
-// Mimir — state store: single source of truth, persisted to localStorage.
+// Snotra — state store: single source of truth, persisted to localStorage.
 import { uid, ymd, todayYmd, addDays, startOfWeek, quarterOf } from './utils.js';
 
-const KEY = 'mimir.data.v1';
+const KEY = 'snotra.data.v1';
 
 const defaults = () => ({
   version: 1,
@@ -62,7 +62,7 @@ function load() {
       sync: { ...defaults().sync, ...(data.sync || {}) },
     };
   } catch (e) {
-    console.error('Mimir: failed to load state, starting fresh', e);
+    console.error('Snotra: failed to load state, starting fresh', e);
     return seed(defaults());
   }
 }
@@ -71,9 +71,9 @@ function seed(s) {
   const t = todayYmd();
   const note = {
     id: uid(),
-    title: 'Welcome to Mimir',
+    title: 'Welcome to Snotra',
     body: [
-      'Mimir is your unified brain: tasks, calendar, notes and deep work — all connected.',
+      'Snotra is your unified brain: tasks, calendar, notes and deep work — all connected.',
       '',
       '## How it flows',
       '- Capture everything with **Q** (quick add) — try `Call Anna tomorrow 10am @loki !high for 30m`',
@@ -84,13 +84,13 @@ function seed(s) {
       '- Review your week every Sunday',
       '',
       '## Everything is linked',
-      '- Link notes with [[Welcome to Mimir]] syntax',
+      '- Link notes with [[Welcome to Snotra]] syntax',
       '- Timer sessions log against tasks, so you see planned vs actual',
       '- `- [ ] task lines` inside notes are clickable checkboxes',
       '',
       'Your data lives in this browser only. Export a backup from Settings any time.',
     ].join('\n'),
-    tags: ['mimir'], pinned: true, daily: null,
+    tags: ['snotra'], pinned: true, daily: null,
     createdAt: Date.now(), updatedAt: Date.now(),
   };
   s.notes.push(note);
@@ -117,7 +117,7 @@ export function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     try { localStorage.setItem(KEY, JSON.stringify(state)); }
-    catch (e) { console.error('Mimir: save failed', e); }
+    catch (e) { console.error('Snotra: save failed', e); }
   }, 80);
   listeners.forEach(fn => fn());
 }
@@ -129,7 +129,7 @@ export function exportJson() {
 }
 export function importJson(json) {
   const data = JSON.parse(json);
-  if (!data || typeof data !== 'object' || !Array.isArray(data.tasks)) throw new Error('Not a Mimir backup file');
+  if (!data || typeof data !== 'object' || !Array.isArray(data.tasks)) throw new Error('Not a Snotra backup file');
   state = {
     ...defaults(), ...data,
     settings: { ...defaults().settings, ...(data.settings || {}) },

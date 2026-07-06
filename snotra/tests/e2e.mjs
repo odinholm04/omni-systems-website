@@ -1,9 +1,9 @@
-// Mimir end-to-end tests. Drives every feature in a real browser.
+// Snotra end-to-end tests. Drives every feature in a real browser.
 // Usage:  npm i playwright  &&  node e2e.mjs [baseUrl]
-// Serves default: http://localhost:8931/mimir/
+// Serves default: http://localhost:8931/snotra/
 import { chromium } from 'playwright';
 
-const BASE = process.argv[2] || 'http://localhost:8931/mimir/';
+const BASE = process.argv[2] || 'http://localhost:8931/snotra/';
 let passed = 0, failed = 0;
 const failures = [];
 
@@ -20,7 +20,7 @@ const page = await ctx.newPage();
 page.on('pageerror', e => { failed++; failures.push('PAGE ERROR: ' + e.message); console.log('  ✗ PAGE ERROR:', e.message); });
 page.on('dialog', d => d.accept());
 
-const getState = () => page.evaluate(() => JSON.parse(localStorage.getItem('mimir.data.v1') || 'null'));
+const getState = () => page.evaluate(() => JSON.parse(localStorage.getItem('snotra.data.v1') || 'null'));
 const flush = () => sleep(250); // store saves are debounced 80ms
 
 async function freshLoad() {
@@ -45,7 +45,7 @@ async function dragDrop(srcSel, dstSel) {
 // ---------------------------------------------------------------- 1. boot & seed
 console.log('\n1. Boot, seed & navigation');
 await freshLoad();
-check('app renders sidebar brand', await page.textContent('.brand-name') === 'MIMIR');
+check('app renders sidebar brand', await page.textContent('.brand-name') === 'SNOTRA');
 let st = await getState();
 check('seed data created (tasks + welcome note)', st && st.tasks.length >= 3 && st.notes.length >= 1);
 check('Today view active by default', await page.getAttribute('#nav a.active', 'data-nav') === 'today');
@@ -192,7 +192,7 @@ if (pill) { await pill.click(); await sleep(120); check('pill opens editor', awa
 // ---------------------------------------------------------------- 7. notes
 console.log('\n7. Notes, markdown, wikilinks');
 await page.goto(BASE + '#/notes'); await sleep(200);
-check('welcome note listed', (await page.textContent('.notes-list')).includes('Welcome to Mimir'));
+check('welcome note listed', (await page.textContent('.notes-list')).includes('Welcome to Snotra'));
 await page.click('#nt-new'); await sleep(150);
 await page.fill('#nt-title', 'Loki launch plan');
 await page.press('#nt-title', 'Enter'); await sleep(150);
@@ -225,7 +225,7 @@ check('note→task lands in inbox with backlink', st.tasks.some(t => t.title ===
 
 // search
 await page.fill('#nt-search', 'launch'); await sleep(400);
-check('note search filters', (await page.textContent('.notes-list')).includes('Loki launch plan') && !(await page.textContent('.notes-list')).includes('Welcome to Mimir'));
+check('note search filters', (await page.textContent('.notes-list')).includes('Loki launch plan') && !(await page.textContent('.notes-list')).includes('Welcome to Snotra'));
 await page.fill('#nt-search', ''); await sleep(400);
 
 // ---------------------------------------------------------------- 8. focus timer
@@ -252,13 +252,13 @@ check('distraction counted', st.focus && st.focus.distractions === 1);
 // mini timer visible on other pages
 await page.goto(BASE + '#/today'); await sleep(1300);
 check('mini focus timer in sidebar', await page.isVisible('#mini-focus'));
-check('tab title shows countdown', (await page.title()).includes('· Mimir'));
+check('tab title shows countdown', (await page.title()).includes('· Snotra'));
 
 // simulate 2 minutes passing (rewind startedAt) then finish
 await page.evaluate(() => {
-  const d = JSON.parse(localStorage.getItem('mimir.data.v1'));
+  const d = JSON.parse(localStorage.getItem('snotra.data.v1'));
   d.focus.startedAt -= 2 * 60000;
-  localStorage.setItem('mimir.data.v1', JSON.stringify(d));
+  localStorage.setItem('snotra.data.v1', JSON.stringify(d));
 });
 await page.reload(); await sleep(1600); // mini timer updates on the 1s tick
 check('active session survives reload', await page.isVisible('#mini-focus'));
@@ -275,12 +275,12 @@ check('sessions list shows entry', (await page.textContent('#view')).includes("T
 console.log('\n9. Plan My Day wizard');
 // create a leftover + backlog task
 await page.evaluate(() => {
-  const d = JSON.parse(localStorage.getItem('mimir.data.v1'));
+  const d = JSON.parse(localStorage.getItem('snotra.data.v1'));
   const y = new Date(Date.now() - 86400000);
   const ymd = `${y.getFullYear()}-${String(y.getMonth() + 1).padStart(2, '0')}-${String(y.getDate()).padStart(2, '0')}`;
   d.tasks.push({ id: 'leftover1', title: 'Yesterday leftover', notes: '', status: 'todo', priority: 'high', inbox: false, project: null, tags: [], scheduled: ymd, time: null, durationMin: null, estimateMin: 60, createdAt: Date.now(), completedAt: null, goalId: null, rollovers: 0, order: 1 });
   d.tasks.push({ id: 'backlog1', title: 'Backlog candidate', notes: '', status: 'todo', priority: 'normal', inbox: false, project: null, tags: [], scheduled: null, time: null, durationMin: null, estimateMin: 120, createdAt: Date.now(), completedAt: null, goalId: null, rollovers: 0, order: 2 });
-  localStorage.setItem('mimir.data.v1', JSON.stringify(d));
+  localStorage.setItem('snotra.data.v1', JSON.stringify(d));
 });
 await page.reload(); await sleep(300);
 await page.keyboard.press('p');
@@ -407,7 +407,7 @@ check('capacity saved', st.settings.capacityHours === 6);
 // export produces a download
 await page.click('#btn-settings'); await sleep(200);
 const [download] = await Promise.all([page.waitForEvent('download'), page.click('#st-export')]);
-check('export downloads JSON', (download.suggestedFilename() || '').startsWith('mimir-backup-'));
+check('export downloads JSON', (download.suggestedFilename() || '').startsWith('snotra-backup-'));
 await page.keyboard.press('Escape');
 
 // persistence across reload
@@ -458,14 +458,14 @@ check('perfect streak = 1', (await page.textContent('.saga-streaks')).includes('
 
 // inject 3 prior perfect days → streak 4 and rank progress
 await page.evaluate(() => {
-  const d = JSON.parse(localStorage.getItem('mimir.data.v1'));
+  const d = JSON.parse(localStorage.getItem('snotra.data.v1'));
   const all = { m: [0,1,2,3,4,5,6,7,8,9,10], n: [0,1,2,3,4] };
   for (let i = 1; i <= 3; i++) {
     const dt = new Date(Date.now() - i*86400000);
     const k = `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;
     d.habits.log[k] = JSON.parse(JSON.stringify(all));
   }
-  localStorage.setItem('mimir.data.v1', JSON.stringify(d));
+  localStorage.setItem('snotra.data.v1', JSON.stringify(d));
 });
 await page.reload(); await sleep(300);
 check('perfect streak = 4 after history', (await page.textContent('.saga-streaks')).includes('✦ 4d'));
@@ -560,12 +560,12 @@ let published = null;
 await page.route('**/rest/v1/rpc/**', async route => {
   const url = route.request().url();
   const body = JSON.parse(route.request().postData() || '{}');
-  if (url.includes('mimir_create_profile')) {
+  if (url.includes('snotra_create_profile')) {
     await route.fulfill({ json: [{ share_code: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeffff0000', secret: '99999999-8888-4777-8666-555544443333' }] });
-  } else if (url.includes('mimir_publish')) {
+  } else if (url.includes('snotra_publish')) {
     published = body;
     await route.fulfill({ json: true });
-  } else if (url.includes('mimir_get_profile')) {
+  } else if (url.includes('snotra_get_profile')) {
     await route.fulfill({ json: [{
       name: 'Gummi',
       data: { v: 1, rank: 'Víkingr', xp: 1800, streaks: { m: 5, n: 3, p: 2 },
@@ -609,19 +609,19 @@ console.log('\n19. Ritual reminders');
 await ctx.grantPermissions(['notifications'], { origin: new URL(BASE).origin });
 // set bedtime so that one dusk anchor is exactly now, enable reminders
 await page.evaluate(() => {
-  const d = JSON.parse(localStorage.getItem('mimir.data.v1'));
+  const d = JSON.parse(localStorage.getItem('snotra.data.v1'));
   d.settings.reminders = true;
   const now = new Date();
   const bedMin = now.getHours() * 60 + now.getMinutes() + 60; // anchor "no screens" (60 off) = now
   d.habits.bedtime = `${String(Math.floor((bedMin % 1440) / 60)).padStart(2, '0')}:${String(bedMin % 60).padStart(2, '0')}`;
   d.habits.log[new Date().toISOString().slice(0,10)].n = []; // ensure unchecked
-  localStorage.setItem('mimir.data.v1', JSON.stringify(d));
-  localStorage.removeItem('mimir.notified.v1');
+  localStorage.setItem('snotra.data.v1', JSON.stringify(d));
+  localStorage.removeItem('snotra.notified.v1');
 });
 await page.reload(); await sleep(500);
-const fired = await page.evaluate(() => window.__mimirReminderCheck());
+const fired = await page.evaluate(() => window.__snotraReminderCheck());
 check('reminder fires at dusk anchor', Array.isArray(fired) && fired.some(k => k.startsWith('n')), JSON.stringify(fired));
-const fired2 = await page.evaluate(() => window.__mimirReminderCheck());
+const fired2 = await page.evaluate(() => window.__snotraReminderCheck());
 check('reminder fires only once', Array.isArray(fired2) && fired2.length === 0);
 await page.unroute('**/rest/v1/rpc/**');
 

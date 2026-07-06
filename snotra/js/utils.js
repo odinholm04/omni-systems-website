@@ -1,4 +1,4 @@
-// Mimir — shared utilities: ids, dates, natural-language parsing, markdown.
+// Snotra — shared utilities: ids, dates, natural-language parsing, markdown.
 
 export const uid = () => 'id-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 

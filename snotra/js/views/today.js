@@ -1,4 +1,4 @@
-// Snotra — Today: the daily command center.
+// Snotra - Today: the daily command center.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, fmtDate, minutesToHM, timeToMin } from '../utils.js';
 import { toast, renderApp } from '../app.js';
@@ -44,8 +44,8 @@ export function renderToday(el) {
   <div class="stat-tiles">
     <div class="stat-tile accent"><div class="sv">${minutesToHM(focusMin)}</div><div class="sl">deep work today · goal ${minutesToHM(s.focusGoalMin)}</div></div>
     <div class="stat-tile"><div class="sv">${doneCount}/${tasks.length}</div><div class="sl">tasks done today</div></div>
-    <div class="stat-tile"><div class="sv">${minutesToHM(plannedMin)}</div><div class="sl">planned load · capacity ${s.capacityHours}h ${plannedMin > capMin ? '<span style="color:var(--red)">— over!</span>' : ''}</div></div>
-    <div class="stat-tile"><div class="sv">${streak > 0 ? '🔥 ' + streak : '—'}</div><div class="sl">focus-goal streak (days)</div></div>
+    <div class="stat-tile"><div class="sv">${minutesToHM(plannedMin)}</div><div class="sl">planned load · capacity ${s.capacityHours}h ${plannedMin > capMin ? '<span style="color:var(--red)">- over!</span>' : ''}</div></div>
+    <div class="stat-tile"><div class="sv">${streak > 0 ? '🔥 ' + streak : '-'}</div><div class="sl">focus-goal streak (days)</div></div>
   </div>
 
   ${overdue.length ? `<div class="card" style="border-color:rgba(217,123,108,.4);margin-bottom:14px">
@@ -72,7 +72,7 @@ export function renderToday(el) {
             <span class="tlm-time">${x.start}${x.end ? '–' + x.end : ''}</span>
             <span class="tlm-title ${x.done ? 'faint' : ''}" style="${x.done ? 'text-decoration:line-through' : ''}">${escapeHtml(x.title)}</span>
             <span class="tlm-kind k-${x.kind}-text">${x.kind === 'task' ? 'task' : KIND_LABEL[x.kind].toLowerCase()}</span>
-          </div>`).join('') : '<div class="empty">No blocks yet — add a deep work block for your most important task.</div>'}
+          </div>`).join('') : '<div class="empty">No blocks yet - add a deep work block for your most important task.</div>'}
       </div>
       ${shutdownHint(day, s)}
     </div>
@@ -111,11 +111,11 @@ function openTaskModalForToday() {
 
 function shutdownHint(day, s) {
   if (day.shutdownAt) {
-    return `<p class="faint" style="font-size:12.5px;margin:14px 0 0">Day closed at ${new Date(day.shutdownAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} — “${escapeHtml(s.shutdownPhrase)}”</p>`;
+    return `<p class="faint" style="font-size:12.5px;margin:14px 0 0">Day closed at ${new Date(day.shutdownAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} - “${escapeHtml(s.shutdownPhrase)}”</p>`;
   }
   const end = timeToMin(s.dayEnd);
   const now = new Date().getHours() * 60 + new Date().getMinutes();
-  if (now >= end) return `<p style="font-size:12.5px;margin:14px 0 0;color:var(--amber-bright)">It's past ${s.dayEnd} — run the shutdown ritual (<span class="kbd">S</span>) and close the day.</p>`;
+  if (now >= end) return `<p style="font-size:12.5px;margin:14px 0 0;color:var(--amber-bright)">It's past ${s.dayEnd} - run the shutdown ritual (<span class="kbd">S</span>) and close the day.</p>`;
   return '';
 }
 

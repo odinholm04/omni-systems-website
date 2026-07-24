@@ -1,5 +1,5 @@
-// Snotra — sleep metrics. Manual entry always works; Ultrahuman ring sync is best-effort
-// (their partner API needs a key, and some browsers/networks may block cross-origin calls —
+// Snotra - sleep metrics. Manual entry always works; Ultrahuman ring sync is best-effort
+// (their partner API needs a key, and some browsers/networks may block cross-origin calls -
 // if so Snotra tells you and you enter the score manually).
 import * as store from './store.js';
 import { todayYmd } from './utils.js';

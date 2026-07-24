@@ -1,4 +1,4 @@
-// Snotra — guided rituals: Plan My Day, Triage Inbox, Shutdown, Weekly Review.
+// Snotra - guided rituals: Plan My Day, Triage Inbox, Shutdown, Weekly Review.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, addDays, fmtDate, minutesToHM, startOfWeek, uid, minToTime, timeToMin } from '../utils.js';
 import { showModal, closeModal, renderApp, toast } from '../app.js';
@@ -29,7 +29,7 @@ function planStepLeftovers(leftovers, t) {
           <button class="btn" id="pl-backlog">Backlog<small>no date</small></button>
           <button class="btn danger" id="pl-drop">Let it go<small>delete</small></button>
         </div>
-        <p class="faint" style="font-size:11.5px;margin-top:14px">${idx + 1} of ${leftovers.length} — no silent pile-ups. ${task.rollovers >= 2 ? 'Rolled 3+ times usually means: renegotiate or delete.' : ''}</p>
+        <p class="faint" style="font-size:11.5px;margin-top:14px">${idx + 1} of ${leftovers.length} - no silent pile-ups. ${task.rollovers >= 2 ? 'Rolled 3+ times usually means: renegotiate or delete.' : ''}</p>
       </div>`);
     box.querySelector('#pl-today').onclick = () => { store.updateTask(task.id, { scheduled: t, rollovers: (task.rollovers || 0) + 1 }); idx++; step(); };
     box.querySelector('#pl-tmrw').onclick = () => { store.updateTask(task.id, { scheduled: addDays(t, 1), rollovers: (task.rollovers || 0) + 1 }); idx++; step(); };
@@ -54,7 +54,7 @@ function planStepPick(t) {
     const box = showModal(`
       ${wsteps(['Leftovers', 'Pick tasks', 'Capacity', 'Timeblock'], 1)}
       <h2>What deserves today?</h2>
-      <p class="muted" style="font-size:13px;margin-top:-8px">Already on today: <b>${store.tasksFor(t).filter(x => x.status !== 'done').length}</b> task(s). Add from inbox & backlog — be ambitious, we'll check capacity next.</p>
+      <p class="muted" style="font-size:13px;margin-top:-8px">Already on today: <b>${store.tasksFor(t).filter(x => x.status !== 'done').length}</b> task(s). Add from inbox & backlog - be ambitious, we'll check capacity next.</p>
       <div style="max-height:44vh;overflow-y:auto">${rows || '<div class="empty">Backlog and inbox are empty.</div>'}</div>
       <div class="modal-foot">
         <span class="spacer"></span>
@@ -85,7 +85,7 @@ function planStepCapacity(t) {
       <h2>Reality check: estimates vs capacity</h2>
       <div class="workload ${over ? 'over' : 'ok'}" style="margin-bottom:12px">
         ${minutesToHM(total)} planned / ${s.capacityHours}h capacity
-        ${over ? ' — over! Defer something or shrink estimates.' : ' — fits. 👌'}
+        ${over ? ' - over! Defer something or shrink estimates.' : ' - fits. 👌'}
       </div>
       ${tasks.map(x => `<div class="task-row" style="cursor:default">
         <div class="task-main"><div class="task-title">${escapeHtml(x.title)}</div></div>
@@ -126,7 +126,7 @@ function planStepTimeblock(t) {
         <label>Length<select id="pl-blen">
           <option value="90">90 min</option><option value="120">2 h</option><option value="180" selected>3 h</option>
         </select></label>
-      </div>` : `<p class="muted">${existingDeep ? 'Deep work block already scheduled today. 💪' : 'No tasks today — enjoy the calm or capture something with Q.'}</p>`}
+      </div>` : `<p class="muted">${existingDeep ? 'Deep work block already scheduled today. 💪' : 'No tasks today - enjoy the calm or capture something with Q.'}</p>`}
     <div class="modal-foot">
       <span class="spacer"></span>
       <button class="btn" id="pl-skipblock">${top && !existingDeep ? 'Skip block' : 'Close'}</button>
@@ -210,7 +210,7 @@ export function openShutdown() {
       <div class="stat-tile accent"><div class="sv">${minutesToHM(focusMin)}</div><div class="sl">deep work logged</div></div>
     </div>
     ${done.length ? `<p class="muted" style="font-size:13px">✓ ${done.slice(0, 6).map(x => escapeHtml(x.title)).join(' · ')}${done.length > 6 ? ` +${done.length - 6} more` : ''}</p>` : ''}
-    ${unfinished.length ? `<p class="muted" style="font-size:13.5px"><b>${unfinished.length} unfinished</b> — decide their fate now (no silent rollover):</p>
+    ${unfinished.length ? `<p class="muted" style="font-size:13.5px"><b>${unfinished.length} unfinished</b> - decide their fate now (no silent rollover):</p>
       ${unfinished.map(x => `<div class="task-row" style="cursor:default">
         <div class="task-main"><div class="task-title">${escapeHtml(x.title)}</div></div>
         <select data-fate="${x.id}">
@@ -256,7 +256,7 @@ function shutdownStep3(t) {
   const box = showModal(`
     ${wsteps(['Review', 'Tomorrow', 'Brain dump', 'Close'], 2)}
     <h2>Brain dump</h2>
-    <p class="muted" style="font-size:13px">Any loose thoughts? Out of your head, into the system. One per line — each becomes an inbox task.</p>
+    <p class="muted" style="font-size:13px">Any loose thoughts? Out of your head, into the system. One per line - each becomes an inbox task.</p>
     <textarea id="sd-dump" rows="4" style="width:100%" placeholder="call the accountant&#10;idea: portal dark mode&#10;book gym slot"></textarea>
     <p class="muted" style="font-size:13px;margin-top:12px">One line about today (goes in your daily note):</p>
     <input id="sd-reflect" style="width:100%" placeholder="What worked? What drained you?">
@@ -273,7 +273,7 @@ function shutdownStep3(t) {
     const done = store.get().tasks.filter(x => x.status === 'done' && x.completedAt && new Date(x.completedAt).toDateString() === new Date().toDateString());
     const n = store.dailyNote(t, true);
     const body = [
-      `# Daily — ${t}`, '',
+      `# Daily - ${t}`, '',
       `**Deep work:** ${minutesToHM(store.focusMinOn(t))}`,
       `**Completed (${done.length}):**`,
       ...done.map(x => `- [x] ${x.title}`),
@@ -318,7 +318,7 @@ export function openWeeklyReview() {
 
   const box = showModal(`
     ${wsteps(['The week', 'Reflect', 'Next week'], 0)}
-    <h2>Weekly review — week of ${fmtDate(monday)}</h2>
+    <h2>Weekly review - week of ${fmtDate(monday)}</h2>
     <div class="stat-tiles" style="grid-template-columns:repeat(3,1fr)">
       <div class="stat-tile"><div class="sv">${doneThisWeek.length}</div><div class="sl">tasks completed</div></div>
       <div class="stat-tile accent"><div class="sv">${minutesToHM(focusMin)}</div><div class="sl">deep work</div></div>
@@ -331,7 +331,7 @@ export function openWeeklyReview() {
         return `<div class="hbar"><span class="hl">${p.done ? '✓ ' : ''}${escapeHtml(p.title || 'untitled')}</span>
           <span class="ht"><i style="width:${linked.length ? Math.round(dn / linked.length * 100) : 0}%"></i></span>
           <span class="hv">${dn}/${linked.length}</span></div>`;
-      }).join('')}` : `<p class="faint" style="font-size:13px">No quarterly priorities set — add them under Goals (6) so weekly reviews can track alignment.</p>`}
+      }).join('')}` : `<p class="faint" style="font-size:13px">No quarterly priorities set - add them under Goals (6) so weekly reviews can track alignment.</p>`}
     <p class="muted" style="font-size:13px;margin-top:8px">Objectives you set for this week:</p>
     ${wk.objectives.length ? wk.objectives.map(o => `
       <label class="task-row" style="cursor:pointer"><input type="checkbox" data-obj="${o.id}" ${o.done ? 'checked' : ''} style="margin-top:3px">

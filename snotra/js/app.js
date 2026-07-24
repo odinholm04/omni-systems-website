@@ -1,4 +1,4 @@
-// Snotra — app shell: routing, global keyboard, quick add, command palette, modals, toasts.
+// Snotra - app shell: routing, global keyboard, quick add, command palette, modals, toasts.
 import * as store from './store.js';
 import { parseQuickAdd, escapeHtml, fmtDate, minutesToHM, fuzzyMatch, todayYmd } from './utils.js';
 import { renderToday } from './views/today.js';
@@ -145,7 +145,7 @@ function paletteCommands() {
     { k: 'F', t: 'Start focus session', run: () => navigate('focus') },
     { k: '', t: 'New note', run: () => { const n = store.addNote({ title: 'Untitled' }); navigate('notes', n.id); } },
     { k: '', t: 'New event / timeblock', run: () => openEventModal() },
-    { k: '', t: 'Change palette — accent colour & meaning', run: () => openPaletteModal() },
+    { k: '', t: 'Change palette - accent colour & meaning', run: () => openPaletteModal() },
     { k: '', t: 'Settings · export / import', run: () => openSettingsModal() },
     { k: '', t: 'Toggle light / dark theme', run: toggleTheme },
   ];
@@ -316,7 +316,7 @@ function notify(title, body) {
       new Notification(title, { body, icon: '../icon.svg' });
     }
   } catch (e) { /* headless / unsupported */ }
-  toast(`${title}${body ? ' — ' + body : ''}`, 'warn');
+  toast(`${title}${body ? ' - ' + body : ''}`, 'warn');
 }
 export function reminderCheck(now = new Date()) {
   const st = store.get();
@@ -358,7 +358,7 @@ import('./sync.js').then(sync => store.onChange(() => sync.schedulePublish()));
 import('./metrics.js').then(({ fetchUltrahuman }) => {
   const s = store.get();
   if (s.settings.uhKey && s.settings.uhEmail && !s.metrics[todayYmd()]) {
-    fetchUltrahuman().then(r => toast(`◉ Ring synced: sleep score ${r.sleepScore ?? '—'}`, 'success')).catch(() => {});
+    fetchUltrahuman().then(r => toast(`◉ Ring synced: sleep score ${r.sleepScore ?? '-'}`, 'success')).catch(() => {});
   }
 });
 applyTheme();
@@ -373,8 +373,8 @@ renderApp();
     setTimeout(() => toast('Good morning ✦ Press <span class="kbd">P</span> to plan your day', 'warn'), 900);
   }
   if (hour >= 6 && hour < 15 && !store.ritualDone(t, 'm')) {
-    setTimeout(() => toast('☀ The dawn ritual awaits — press <span class="kbd">8</span>', 'warn'), 1600);
+    setTimeout(() => toast('☀ The dawn ritual awaits - press <span class="kbd">8</span>', 'warn'), 1600);
   } else if (hour >= 17 && !store.ritualDone(t, 'n')) {
-    setTimeout(() => toast('☾ Wind-down is near — dusk ritual on <span class="kbd">8</span>', 'warn'), 1600);
+    setTimeout(() => toast('☾ Wind-down is near - dusk ritual on <span class="kbd">8</span>', 'warn'), 1600);
   }
 })();

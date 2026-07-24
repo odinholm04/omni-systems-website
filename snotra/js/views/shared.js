@@ -1,4 +1,4 @@
-// Snotra — shared render helpers (task rows, etc.)
+// Snotra - shared render helpers (task rows, etc.)
 import * as store from '../store.js';
 import { escapeHtml, fmtDate, minutesToHM, todayYmd } from '../utils.js';
 import { renderApp, toast } from '../app.js';

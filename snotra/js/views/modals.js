@@ -1,4 +1,4 @@
-// Snotra — task / event / settings modals.
+// Snotra - task / event / settings modals.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, minutesToHM } from '../utils.js';
 import { showModal, closeModal, renderApp, toast } from '../app.js';
@@ -39,7 +39,7 @@ export function openTaskModal(id = null) {
     </div>
     <div class="form-row">
       <label>Tags (comma separated)<input id="tm-tags" value="${escapeHtml(v.tags.join(', '))}" placeholder="video, edit"></label>
-      <label>Quarterly priority<select id="tm-goal"><option value="">— none —</option>${goalOptions.join('')}</select></label>
+      <label>Quarterly priority<select id="tm-goal"><option value="">- none -</option>${goalOptions.join('')}</select></label>
     </div>
     <div class="form-row"><label style="flex:100%">Notes
       <textarea id="tm-notes" rows="3" placeholder="Details, links…">${escapeHtml(v.notes)}</textarea></label></div>
@@ -110,7 +110,7 @@ export function openEventModal(id = null, defaults = {}) {
       <label>End<input type="time" id="em-end" value="${v.end}"></label>
     </div>
     <div class="form-row"><label style="flex:100%">Linked task (worked on during this block)
-      <select id="em-task"><option value="">— none —</option>
+      <select id="em-task"><option value="">- none -</option>
       ${openTasks.map(t => `<option value="${t.id}" ${(v.taskIds || [])[0] === t.id ? 'selected' : ''}>${escapeHtml(t.title)}</option>`).join('')}
       </select></label></div>
     <div class="form-row"><label style="flex:100%">Notes
@@ -152,7 +152,7 @@ export function openSettingsModal() {
         <option value="light" ${s.theme === 'light' ? 'selected' : ''}>Light</option>
       </select></label>
       <label>Accent colour<button class="btn" id="st-palette" type="button" style="width:100%;text-align:left">
-        <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--amber);vertical-align:middle;margin-right:7px"></span>${escapeHtml(accentDef(s.accent).name)} — choose…</button></label>
+        <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--amber);vertical-align:middle;margin-right:7px"></span>${escapeHtml(accentDef(s.accent).name)} - choose…</button></label>
     </div>
     <div class="form-row">
       <label>Day starts<input type="time" id="st-start" value="${s.dayStart}"></label>
@@ -164,13 +164,15 @@ export function openSettingsModal() {
     </div>
     <div class="form-row"><label style="flex:100%">Shutdown phrase<input id="st-phrase" value="${escapeHtml(s.shutdownPhrase)}"></label></div>
     <h2 style="margin-top:20px">Ultrahuman ring</h2>
-    <p class="muted" style="font-size:12.5px">Optional — auto-fills your sleep score each morning so automatic quests judge themselves. Get a Partner API key from Ultrahuman support, then Snotra fetches your metrics directly (data stays in your browser).</p>
+    <p class="muted" style="font-size:12.5px">Optional. Auto-fills your sleep score each morning so automatic quests judge themselves. Once you have a Partner API key, Snotra fetches your metrics directly (data stays in your browser).</p>
+    <div class="chip" style="color:var(--amber-bright);border-color:rgba(232,163,61,.4);margin-bottom:10px">⏳ Partner API access requested from Ultrahuman &middot; pending approval</div>
+    <p class="faint" style="font-size:11.5px;margin:0 0 10px">Access is granted by application (typically 1-2 weeks). Until the key arrives, use <b>Log sleep</b> on the Rituals page to enter your score manually; auto-sync switches on the moment you paste the key below.</p>
     <div class="form-row">
       <label>Account email<input id="st-uhemail" type="email" value="${escapeHtml(s.uhEmail || '')}" placeholder="you@example.com"></label>
       <label>Partner API key<input id="st-uhkey" type="password" value="${escapeHtml(s.uhKey || '')}" placeholder="uh_…"></label>
     </div>
     <h2 style="margin-top:20px">Data</h2>
-    <p class="muted" style="font-size:13px">Everything lives in this browser's local storage. Export a backup regularly — it's a plain JSON file you can re-import anywhere.</p>
+    <p class="muted" style="font-size:13px">Everything lives in this browser's local storage. Export a backup regularly - it's a plain JSON file you can re-import anywhere.</p>
     <div class="modal-foot" style="margin-top:8px">
       <button class="btn" id="st-export">⬇ Export backup</button>
       <button class="btn" id="st-import">⬆ Import backup</button>

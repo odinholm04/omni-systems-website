@@ -1,4 +1,4 @@
-// Snotra — Notes: markdown notes with wiki-links, tags, daily notes.
+// Snotra - Notes: markdown notes with wiki-links, tags, daily notes.
 import * as store from '../store.js';
 import { escapeHtml, renderMarkdown, toggleMdCheckbox, debounce, todayYmd, fmtDate } from '../utils.js';
 import { navigate, toast } from '../app.js';
@@ -29,7 +29,7 @@ export function renderNotes(el, param) {
     <div class="notes-list card" style="padding:8px">
       ${notes.map(n => `<div class="note-item ${n.id === activeId ? 'active' : ''}" data-note="${n.id}">
         <div class="nt">${n.pinned ? '📌 ' : ''}${n.daily ? '☀ ' : ''}${escapeHtml(n.title)}</div>
-        <div class="np">${escapeHtml(n.body.replace(/[#>*\-\[\]]/g, '').slice(0, 60)) || '—'}</div>
+        <div class="np">${escapeHtml(n.body.replace(/[#>*\-\[\]]/g, '').slice(0, 60)) || '-'}</div>
       </div>`).join('') || '<div class="empty">No notes match.</div>'}
     </div>
     <div class="note-editor card" id="nt-editor">
@@ -67,7 +67,7 @@ function editorHtml(n) {
     </div>
     <div class="note-body">
       ${previewMode
-        ? `<div class="note-preview" id="nt-preview">${renderMarkdown(n.body) || '<p class="faint">Empty note — click Edit.</p>'}</div>`
+        ? `<div class="note-preview" id="nt-preview">${renderMarkdown(n.body) || '<p class="faint">Empty note - click Edit.</p>'}</div>`
         : `<textarea id="nt-body" placeholder="Write in markdown… use [[Note Title]] to link notes, - [ ] for checklists">${escapeHtml(n.body)}</textarea>
            <div class="note-preview" id="nt-preview">${renderMarkdown(n.body)}</div>`}
     </div>`;

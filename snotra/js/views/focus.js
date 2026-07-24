@@ -1,4 +1,4 @@
-// Snotra — Focus: deep work timer bound to tasks, distraction parking, session log.
+// Snotra - Focus: deep work timer bound to tasks, distraction parking, session log.
 import * as store from '../store.js';
 import { escapeHtml, minutesToHM, todayYmd } from '../utils.js';
 import { navigate, renderApp, toast, currentRoute } from '../app.js';
@@ -37,7 +37,7 @@ function setupHtml() {
 
   return `
     <h1 style="margin:8px 0 4px">Deep Work</h1>
-    <p class="muted" style="margin-top:0">One task. One block. Nothing else. <span class="faint">Phone in the bag — you know the ritual.</span></p>
+    <p class="muted" style="margin-top:0">One task. One block. Nothing else. <span class="faint">Phone in the bag - you know the ritual.</span></p>
 
     <div class="focus-presets">
       ${PRESETS.map(p => `<div class="preset ${p.key === chosenPreset ? 'active' : ''}" data-preset="${p.key}">
@@ -46,7 +46,7 @@ function setupHtml() {
 
     <div style="max-width:440px;margin:0 auto">
       <select id="fc-task" style="width:100%">
-        <option value="">— no specific task (general deep work) —</option>
+        <option value="">- no specific task (general deep work) -</option>
         ${candidates.map(x => `<option value="${x.id}" ${x.id === chosenTaskId ? 'selected' : ''}>${x.scheduled === t ? '☀ ' : ''}${escapeHtml(x.title)}</option>`).join('')}
       </select>
       <button class="btn primary" id="fc-start" style="width:100%;margin-top:12px;padding:13px;font-size:15px">▶ Start ${PRESETS.find(p => p.key === chosenPreset).min} min block</button>
@@ -105,7 +105,7 @@ function runningHtml() {
     </div>
     <div class="park-box">
       <input id="fc-park" placeholder="💭 Distracting thought? Park it here → inbox (↵)" style="width:100%">
-      <p class="faint" style="font-size:11.5px;margin-top:6px">Attention residue is real — park it, don't switch. ${f.distractions ? `${f.distractions} parked this session.` : ''}</p>
+      <p class="faint" style="font-size:11.5px;margin-top:6px">Attention residue is real - park it, don't switch. ${f.distractions ? `${f.distractions} parked this session.` : ''}</p>
     </div>`;
 }
 
@@ -160,14 +160,14 @@ function weekFocus() {
   return Math.round(sum);
 }
 
-// Called every second from app.js — updates running clock, mini timer, tab title.
+// Called every second from app.js - updates running clock, mini timer, tab title.
 let notified = false;
 export function focusTick() {
   const f = store.get().focus;
   const mini = document.getElementById('mini-focus');
   if (!f) {
     mini.hidden = true;
-    if (document.title !== 'Snotra — your unified brain') document.title = 'Snotra — your unified brain';
+    if (document.title !== 'Snotra - your unified brain') document.title = 'Snotra - your unified brain';
     notified = false;
     return;
   }
@@ -192,9 +192,9 @@ export function focusTick() {
     notified = true;
     chime();
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification('Snotra — block complete', { body: task ? `“${task.title}” block done. Take a real break.` : 'Deep work block done. Take a real break.' });
+      new Notification('Snotra - block complete', { body: task ? `“${task.title}” block done. Take a real break.` : 'Deep work block done. Take a real break.' });
     }
-    toast('⏰ Block complete — finish up and take a break', 'warn');
+    toast('⏰ Block complete - finish up and take a break', 'warn');
   }
 }
 

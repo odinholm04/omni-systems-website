@@ -1,6 +1,6 @@
-// Snotra — Fellowship sync. Tiny capability-code backend (Supabase RPCs, odin-claude-brain).
+// Snotra - Fellowship sync. Tiny capability-code backend (Supabase RPCs, odin-claude-brain).
 // Your share code lets a friend READ your published saga stats; only your secret can WRITE.
-// Nothing else leaves the browser — tasks, notes and calendar stay local.
+// Nothing else leaves the browser - tasks, notes and calendar stay local.
 import * as store from './store.js';
 import { todayYmd } from './utils.js';
 

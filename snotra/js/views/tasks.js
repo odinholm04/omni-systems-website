@@ -1,4 +1,4 @@
-// Snotra — Tasks: inbox / backlog / scheduled, list + kanban views.
+// Snotra - Tasks: inbox / backlog / scheduled, list + kanban views.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, fmtDate } from '../utils.js';
 import { renderApp, openQuickAdd } from '../app.js';
@@ -92,7 +92,7 @@ function kanbanHtml(all) {
   return `<div class="kanban">${cols.map(([key, label, ts]) => `
     <div class="col" data-col="${key}">
       <h3>${label} · ${ts.length}</h3>
-      ${ts.map(t => taskRowHtml(t, { draggable: true })).join('') || '<div class="empty">—</div>'}
+      ${ts.map(t => taskRowHtml(t, { draggable: true })).join('') || '<div class="empty">-</div>'}
     </div>`).join('')}</div>`;
 }
 

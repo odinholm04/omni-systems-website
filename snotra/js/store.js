@@ -1,4 +1,4 @@
-// Snotra — state store: single source of truth, persisted to localStorage.
+// Snotra - state store: single source of truth, persisted to localStorage.
 import { uid, ymd, todayYmd, addDays, startOfWeek, quarterOf } from './utils.js';
 
 const KEY = 'snotra.data.v1';
@@ -21,19 +21,19 @@ const defaults = () => ({
   notes: [],       // {id,title,body,tags,pinned,daily,createdAt,updatedAt}
   sessions: [],    // {id,taskId,mode,plannedMin,startedAt,endedAt,minutes,completed,distractions}
   goals: [],       // {id,year,quarter,theme,why,priorities:[{id,title,metric,tag,done}]}
-  habits: {        // The Daily Saga — morning + night rituals (sourced from the Notion brain)
+  habits: {        // The Daily Saga - morning + night rituals (sourced from the Notion brain)
     bedtime: '21:30',
     morningName: 'Dawn ritual',
     nightName: 'Dusk ritual',
     morning: [
       'Wake up', 'No phone', '10-minute morning walk', 'Back home',
-      '12-minute mobility session', 'Shower — 25 push-ups while water warms up',
+      '12-minute mobility session', 'Shower - 25 push-ups while water warms up',
       'Shave', 'Brush your teeth', 'Floss', 'Caffeine', 'Get to work!',
     ],
     night: [
       { offsetMin: 180, title: 'Stop eating' },
       { offsetMin: 120, title: 'Red light glasses on' },
-      { offsetMin: 60, title: 'No screens — wind down' },
+      { offsetMin: 60, title: 'No screens - wind down' },
       { offsetMin: 30, title: 'Journal · calming music · magnesium' },
       { offsetMin: 0, title: 'Lights out' },
     ],
@@ -74,13 +74,13 @@ function seed(s) {
     id: uid(),
     title: 'Welcome to Snotra',
     body: [
-      'Snotra is your unified brain: tasks, calendar, notes and deep work — all connected.',
+      'Snotra is your unified brain: tasks, calendar, notes and deep work - all connected.',
       '',
       '## How it flows',
-      '- Capture everything with **Q** (quick add) — try `Call Anna tomorrow 10am @loki !high for 30m`',
+      '- Capture everything with **Q** (quick add) - try `Call Anna tomorrow 10am @loki !high for 30m`',
       '- Triage your inbox with **I**, one item at a time',
-      '- Plan your day each morning (**P**) — pick tasks, estimate, timeblock',
-      '- Start a deep work block with **F** — park distractions instead of switching',
+      '- Plan your day each morning (**P**) - pick tasks, estimate, timeblock',
+      '- Start a deep work block with **F** - park distractions instead of switching',
       '- Close the day with the shutdown ritual (**S**)',
       '- Review your week every Sunday',
       '',
@@ -234,7 +234,7 @@ export function noteByTitle(title) {
 }
 export function dailyNote(date, create = false) {
   let n = state.notes.find(x => x.daily === date);
-  if (!n && create) n = addNote({ title: `Daily — ${date}`, daily: date, tags: ['daily'] });
+  if (!n && create) n = addNote({ title: `Daily - ${date}`, daily: date, tags: ['daily'] });
   return n;
 }
 
@@ -343,7 +343,7 @@ export function ritualDone(date, which) {
 }
 export const perfectDay = date => ritualDone(date, 'm') && ritualDone(date, 'n');
 
-// ---------- quests (custom goals — checkbox or metric-driven) ----------
+// ---------- quests (custom goals - checkbox or metric-driven) ----------
 export function addQuest(patch) {
   const q = { id: uid(), title: '', type: 'check', metric: 'sleepScore', op: '>=', target: 85, createdAt: Date.now(), ...patch };
   state.quests.push(q); save(); return q;

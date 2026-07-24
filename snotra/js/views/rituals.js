@@ -1,4 +1,4 @@
-// Snotra — Rituals: "The Daily Saga". Fully editable morning/night rituals + custom quests,
+// Snotra - Rituals: "The Daily Saga". Fully editable morning/night rituals + custom quests,
 // gamified with XP, Norse ranks, streaks, a rune wall, sleep metrics and a friend Fellowship.
 import * as store from '../store.js';
 import * as sync from '../sync.js';
@@ -47,7 +47,7 @@ export function renderRituals(el) {
   el.innerHTML = `
   <div class="page-head">
     <h1>Rituals</h1>
-    <span class="page-sub">the daily saga — win the morning, guard the night</span>
+    <span class="page-sub">the daily saga - win the morning, guard the night</span>
     <div class="page-actions">
       <button class="btn small ${remindersOn ? 'primary' : ''}" id="rt-remind">${remindersOn ? '🔔 Reminders on' : '🔕 Enable reminders'}</button>
       <button class="btn small" id="rt-edit">✎ Edit rituals</button>
@@ -71,7 +71,7 @@ export function renderRituals(el) {
     </div>
   </div>
 
-  ${perfect ? `<div class="card perfect-banner">✦ Perfect day forged — both rituals complete. The saga grows. (+30 XP)</div>` : ''}
+  ${perfect ? `<div class="card perfect-banner">✦ Perfect day forged - both rituals complete. The saga grows. (+30 XP)</div>` : ''}
 
   <div class="grid cols-2">
     <div class="card ritual-card ${mDone ? 'complete' : ''}">
@@ -90,7 +90,7 @@ export function renderRituals(el) {
       <div class="ritual-steps">
         ${h.night.map((s, i) => stepHtml('n', i, s.title, nightStepTime(s), log.n.includes(i), i === nextIdx)).join('')}
       </div>
-      ${nDone ? `<p class="ritual-victory">“${escapeHtml(store.get().settings.shutdownPhrase)}” — sleep well. 🌙</p>` : ''}
+      ${nDone ? `<p class="ritual-victory">“${escapeHtml(store.get().settings.shutdownPhrase)}” - sleep well. 🌙</p>` : ''}
     </div>
 
     <div class="card">
@@ -100,7 +100,7 @@ export function renderRituals(el) {
         ${store.get().settings.uhKey ? '<button class="btn small" id="rt-ring">◉ Sync ring</button>' : ''}
         <button class="btn small primary" id="rt-addq">+ Quest</button></h2>
       ${quests.length ? quests.map(q => questHtml(q, t)).join('') :
-        `<div class="empty">Your own goals, your rules. A quest is anything you want to be held to daily —
+        `<div class="empty">Your own goals, your rules. A quest is anything you want to be held to daily -
          “Read 10 pages”, “No sugar”, or an automatic one like “Sleep score ≥ 85” that checks itself from your ring data.</div>`}
       ${met ? `<p class="faint" style="font-size:11.5px;margin:10px 0 0">Today's sleep: ${met.sleepScore != null ? `score ${met.sleepScore}` : ''}${met.sleepHours != null ? ` · ${met.sleepHours}h` : ''} <span class="mono">(${met.source})</span></p>` : ''}
     </div>
@@ -137,7 +137,7 @@ export function renderRituals(el) {
     store.toggleHabitStep(t, which, Number(idx));
     if (!wasDone && store.ritualDone(t, which)) {
       toast(which === 'm' ? '☀ Ritual forged! +20 XP' : '☾ Ritual forged! +20 XP', 'success');
-      if (store.perfectDay(t)) toast('✦ PERFECT DAY — the rune is lit! +30 XP', 'success');
+      if (store.perfectDay(t)) toast('✦ PERFECT DAY - the rune is lit! +30 XP', 'success');
     }
     sync.schedulePublish();
     renderApp();
@@ -161,10 +161,10 @@ export function renderRituals(el) {
     ring.disabled = true; ring.textContent = '◉ Syncing…';
     try {
       const r = await fetchUltrahuman();
-      toast(`Ring synced: score ${r.sleepScore ?? '—'}${r.sleepHours ? ` · ${r.sleepHours}h` : ''}`, 'success');
+      toast(`Ring synced: score ${r.sleepScore ?? '-'}${r.sleepHours ? ` · ${r.sleepHours}h` : ''}`, 'success');
       sync.schedulePublish();
     } catch (err) {
-      toast('Ring sync failed: ' + escapeHtml(err.message) + ' — log sleep manually', 'warn');
+      toast('Ring sync failed: ' + escapeHtml(err.message) + ' - log sleep manually', 'warn');
     }
     renderApp();
   };
@@ -214,7 +214,7 @@ function openQuestModal(id = null) {
     <div class="form-row">
       <label>How is it judged?<select id="qm-type">
         <option value="check" ${v.type === 'check' ? 'selected' : ''}>I check it off myself</option>
-        <option value="metric" ${v.type === 'metric' ? 'selected' : ''}>Automatic — from sleep data</option>
+        <option value="metric" ${v.type === 'metric' ? 'selected' : ''}>Automatic - from sleep data</option>
       </select></label>
     </div>
     <div class="form-row" id="qm-metric-row" style="${v.type === 'metric' ? '' : 'display:none'}">
@@ -228,7 +228,7 @@ function openQuestModal(id = null) {
       </select></label>
       <label>Target<input type="number" id="qm-target" step="0.5" value="${v.target}"></label>
     </div>
-    <p class="faint" style="font-size:12px">Automatic quests judge themselves the moment sleep data lands — from your Ultrahuman ring or a manual log. No arguing with the rune wall.</p>
+    <p class="faint" style="font-size:12px">Automatic quests judge themselves the moment sleep data lands - from your Ultrahuman ring or a manual log. No arguing with the rune wall.</p>
     <div class="modal-foot">
       ${q ? '<button class="btn danger" id="qm-del">Delete</button>' : ''}
       <span class="spacer"></span>
@@ -286,7 +286,7 @@ function openSleepModal() {
 function fellowshipHtml(s) {
   if (!s.code) {
     return `<p class="muted" style="font-size:13px">Forge a share code and give it to a friend. They see your streaks, XP and today's
-      progress — you see theirs. Nobody slacks unseen. Tasks, notes and calendar stay private on your device.</p>
+      progress - you see theirs. Nobody slacks unseen. Tasks, notes and calendar stay private on your device.</p>
       <button class="btn primary" id="fw-forge">⚒ Forge my share code</button>`;
   }
   return `
@@ -298,7 +298,7 @@ function fellowshipHtml(s) {
       <input id="fw-input" placeholder="Paste a friend's share code…" style="flex:1">
       <button class="btn" id="fw-add">+ Add companion</button>
     </div>
-    ${s.friends.length ? s.friends.map(friendHtml).join('') : '<div class="empty">No companions yet — send your code to a friend who has Snotra open at omni-systems.ai/snotra.</div>'}
+    ${s.friends.length ? s.friends.map(friendHtml).join('') : '<div class="empty">No companions yet - send your code to a friend who has Snotra open at omni-systems.ai/snotra.</div>'}
     ${sync.lastError ? `<p class="faint" style="font-size:11px;color:var(--red)">sync: ${escapeHtml(sync.lastError)}</p>` : ''}`;
 }
 
@@ -310,13 +310,13 @@ function friendHtml(f) {
   return `<div class="fw-friend" data-friend="${f.code}">
     <div class="fw-friend-head">
       <b>${escapeHtml(f.name || 'Companion')}</b>
-      <span class="chip mono">${escapeHtml(d.rank || '—')} · ${d.xp ?? 0} XP</span>
+      <span class="chip mono">${escapeHtml(d.rank || '-')} · ${d.xp ?? 0} XP</span>
       ${d.streaks ? `<span class="mono faint" style="font-size:11px">☀${d.streaks.m}d ☾${d.streaks.n}d ✦${d.streaks.p}d</span>` : ''}
       <span class="spacer"></span>
       <button class="icon-btn" data-fw-remove="${f.code}" title="Remove">✕</button>
     </div>
     <div class="fw-friend-body mono">
-      ${stale ? `<span style="color:var(--red)">no entry yet today — poke them ⚔</span>`
+      ${stale ? `<span style="color:var(--red)">no entry yet today - poke them ⚔</span>`
         : `today: ☀ ${today.m || '0/0'} · ☾ ${today.n || '0/0'} · ◈ ${today.q || '0/0'}${today.perfect ? ' · <span style="color:var(--amber-bright)">✦ perfect</span>' : ''}`}
       ${d.sleep && d.sleep.score != null ? ` · 😴 ${d.sleep.score}` : ''}
       ${age !== null ? `<span class="faint"> · seen ${age < 1 ? 'just now' : age + 'h ago'}</span>` : ''}
@@ -330,7 +330,7 @@ function wireFellowship(el, s) {
     forge.disabled = true; forge.textContent = '⚒ Forging…';
     try {
       await sync.forgeShareCode();
-      toast('Share code forged — send it to your companion ⚔', 'success');
+      toast('Share code forged - send it to your companion ⚔', 'success');
     } catch (e) {
       toast('Could not reach the sync server: ' + escapeHtml(e.message), 'warn');
     }
@@ -376,7 +376,7 @@ async function enableReminders() {
   const perm = await Notification.requestPermission();
   if (perm !== 'granted') { toast('Notifications blocked by the browser', 'warn'); return; }
   s.reminders = true; store.save(); renderApp();
-  toast('🔔 Reminders on — Snotra will nudge you at each dusk anchor (keep a tab open)', 'success');
+  toast('🔔 Reminders on - Snotra will nudge you at each dusk anchor (keep a tab open)', 'success');
 }
 
 // ---------- ritual editor ----------
@@ -384,7 +384,7 @@ function openRitualEditor() {
   const h = store.get().habits;
   const box = showModal(`
     <h2>Edit rituals</h2>
-    <p class="muted" style="font-size:12.5px;margin-top:-8px">Make it yours — or hand Snotra to a friend and let them write their own saga.</p>
+    <p class="muted" style="font-size:12.5px;margin-top:-8px">Make it yours - or hand Snotra to a friend and let them write their own saga.</p>
     <div class="form-row">
       <label>Morning ritual name<input id="re-mname" value="${escapeHtml(h.morningName)}"></label>
       <label>Night ritual name<input id="re-nname" value="${escapeHtml(h.nightName)}"></label>

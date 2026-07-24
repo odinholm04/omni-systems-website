@@ -1,4 +1,4 @@
-// Snotra — Goals: rolling quarterly planning (theme + 2-4 priorities, linked to tasks).
+// Snotra - Goals: rolling quarterly planning (theme + 2-4 priorities, linked to tasks).
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, quarterOf, uid } from '../utils.js';
 import { renderApp, toast } from '../app.js';
@@ -16,7 +16,7 @@ export function renderGoals(el) {
   el.innerHTML = `
   <div class="page-head">
     <h1>Quarterly Goals</h1>
-    <span class="page-sub">rolling planning — plan this quarter in detail, sketch the next</span>
+    <span class="page-sub">rolling planning - plan this quarter in detail, sketch the next</span>
     <div class="page-actions">
       <button class="btn small" id="gl-prev">←</button>
       <span class="mono" style="font-size:14px;min-width:90px;text-align:center">Q${viewQuarter} ${viewYear}</span>
@@ -79,11 +79,11 @@ function priorityHtml(g, p) {
   return `<div class="goal-priority">
     <div style="display:flex;gap:8px;align-items:center">
       <button class="task-check ${p.done ? '' : ''}" data-p-done="${p.id}" style="${p.done ? 'background:var(--green);border-color:var(--green)' : ''}" title="Mark achieved"></button>
-      <input data-p-title="${p.id}" value="${escapeHtml(p.title)}" placeholder="Priority — specific outcome" style="flex:1;font-weight:600;${p.done ? 'text-decoration:line-through;color:var(--faint)' : ''}">
+      <input data-p-title="${p.id}" value="${escapeHtml(p.title)}" placeholder="Priority - specific outcome" style="flex:1;font-weight:600;${p.done ? 'text-decoration:line-through;color:var(--faint)' : ''}">
       <button class="icon-btn" data-p-del="${p.id}" title="Remove">✕</button>
     </div>
-    <input data-p-metric="${p.id}" value="${escapeHtml(p.metric)}" placeholder="Success metric — how will you know?" style="width:100%;margin-top:8px;font-size:12.5px">
+    <input data-p-metric="${p.id}" value="${escapeHtml(p.metric)}" placeholder="Success metric - how will you know?" style="width:100%;margin-top:8px;font-size:12.5px">
     <div class="progressbar" title="${done}/${linked.length} linked tasks done"><i style="width:${pct}%"></i></div>
-    <p class="faint" style="font-size:11.5px;margin:6px 0 0">${linked.length ? `${done}/${linked.length} linked tasks done` : 'No tasks linked yet — link tasks to this priority from the task editor.'}</p>
+    <p class="faint" style="font-size:11.5px;margin:6px 0 0">${linked.length ? `${done}/${linked.length} linked tasks done` : 'No tasks linked yet - link tasks to this priority from the task editor.'}</p>
   </div>`;
 }

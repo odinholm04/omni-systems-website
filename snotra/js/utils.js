@@ -1,4 +1,4 @@
-// Snotra — shared utilities: ids, dates, natural-language parsing, markdown.
+// Snotra - shared utilities: ids, dates, natural-language parsing, markdown.
 
 export const uid = () => 'id-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 
@@ -91,7 +91,7 @@ export function parseQuickAdd(input, base = new Date()) {
   const timeRe = /\s(?:at\s+)?(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)?\b(?!\s*(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|\d))/i;
   text = text.replace(timeRe, (m0, h, mm, ap) => {
     let H = Number(h);
-    if (!ap && !mm) return m0; // bare number without am/pm or :MM — probably not a time
+    if (!ap && !mm) return m0; // bare number without am/pm or :MM - probably not a time
     if (ap) {
       ap = ap.toLowerCase();
       if (ap === 'pm' && H < 12) H += 12;

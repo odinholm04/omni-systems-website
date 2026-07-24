@@ -1,4 +1,4 @@
-// Snotra — Insights: focus analytics + estimate accuracy. Single-hue charts, direct labels.
+// Snotra - Insights: focus analytics + estimate accuracy. Single-hue charts, direct labels.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, addDays, minutesToHM, startOfWeek } from '../utils.js';
 
@@ -45,7 +45,7 @@ export function renderInsights(el) {
   const goalPct = totalMin ? Math.round(goalMin / totalMin * 100) : 0;
 
   el.innerHTML = `
-  <div class="page-head"><h1>Insights</h1><span class="page-sub">what actually happened — not what you hoped</span></div>
+  <div class="page-head"><h1>Insights</h1><span class="page-sub">what actually happened - not what you hoped</span></div>
 
   <div class="stat-tiles">
     <div class="stat-tile accent"><div class="sv">${minutesToHM(weekMin)}</div>
@@ -57,7 +57,7 @@ export function renderInsights(el) {
 
   <div class="grid cols-2">
     <div class="card">
-      <h2>Deep work — last 14 days <span class="count">goal ${minutesToHM(s.focusGoalMin)}/day</span></h2>
+      <h2>Deep work - last 14 days <span class="count">goal ${minutesToHM(s.focusGoalMin)}/day</span></h2>
       <div class="barchart" role="img" aria-label="Deep work minutes per day, last 14 days">
         ${focusByDay.map(x => {
           const hpct = Math.round(x.min / maxMin * 100);

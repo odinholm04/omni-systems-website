@@ -1,4 +1,4 @@
-// Snotra — accent palette. Dark/light is the base; the accent is a deliberate,
+// Snotra - accent palette. Dark/light is the base; the accent is a deliberate,
 // meaning-driven choice drawn from chakra + colour psychology. The whole app
 // themes off --amber / --amber-bright / --on-accent, so one call re-skins everything.
 import * as store from './store.js';
@@ -7,7 +7,7 @@ import { showModal, closeModal, renderApp, toast } from './app.js';
 // main = accent · bright = lighter tint (accent text / hover) · on = text that sits ON the accent
 export const PALETTE = [
   { key: 'amber', name: 'Amber', chakra: 'Signature', main: '#e8a33d', bright: '#f2b65a', on: '#0a0b0c',
-    meaning: 'Warm focus and steady momentum — Snotra’s home fire.',
+    meaning: 'Warm focus and steady momentum - Snotra’s home fire.',
     when: 'everyday drive & clarity' },
   { key: 'red', name: 'Red', chakra: 'Root · Life force', main: '#e5484d', bright: '#f36a6e', on: '#180809',
     meaning: 'Courage, action and raw life-force. Passion, drive, self-confidence and groundedness.',
@@ -72,9 +72,9 @@ export function openPaletteModal() {
       </button>`).join('');
 
     const box = showModal(`
-      <h2>Palette — align Snotra with your journey</h2>
+      <h2>Palette - align Snotra with your journey</h2>
       <p class="palette-intro">Colour is a tool. Pick the base, then choose the accent that matches where you are and what you’re
-        reaching for right now — the whole app takes on that colour. Change it whenever your focus shifts.</p>
+        reaching for right now - the whole app takes on that colour. Change it whenever your focus shifts.</p>
       <div class="base-toggle">
         <span class="muted" style="font-size:13px">Base</span>
         <div class="seg" id="base-seg">
@@ -96,7 +96,7 @@ export function openPaletteModal() {
       s.accent = c.dataset.accent;
       applyAccent(s.accent);
       store.save();
-      toast(`Accent set to <b>${accentDef(s.accent).name}</b> — ${accentDef(s.accent).when}`, 'success');
+      toast(`Accent set to <b>${accentDef(s.accent).name}</b> - ${accentDef(s.accent).when}`, 'success');
       render();
       renderApp();
     });

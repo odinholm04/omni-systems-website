@@ -11,6 +11,7 @@ import { renderInsights } from './views/insights.js';
 import { renderRituals } from './views/rituals.js';
 import { openPlanDay, openShutdown, openWeeklyReview, openTriage } from './views/wizards.js';
 import { openTaskModal, openEventModal, openSettingsModal } from './views/modals.js';
+import { applyAccent, openPaletteModal } from './palette.js';
 
 const routes = {
   today: renderToday,
@@ -144,6 +145,7 @@ function paletteCommands() {
     { k: 'F', t: 'Start focus session', run: () => navigate('focus') },
     { k: '', t: 'New note', run: () => { const n = store.addNote({ title: 'Untitled' }); navigate('notes', n.id); } },
     { k: '', t: 'New event / timeblock', run: () => openEventModal() },
+    { k: '', t: 'Change palette — accent colour & meaning', run: () => openPaletteModal() },
     { k: '', t: 'Settings · export / import', run: () => openSettingsModal() },
     { k: '', t: 'Toggle light / dark theme', run: toggleTheme },
   ];
@@ -202,6 +204,7 @@ export function toggleTheme() {
 }
 function applyTheme() {
   document.documentElement.dataset.theme = store.get().settings.theme;
+  applyAccent(store.get().settings.accent);
 }
 
 // ---------- global keyboard ----------

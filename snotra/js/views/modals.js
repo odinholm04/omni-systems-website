@@ -3,6 +3,7 @@ import * as store from '../store.js';
 import { escapeHtml, todayYmd, minutesToHM } from '../utils.js';
 import { showModal, closeModal, renderApp, toast } from '../app.js';
 import { startFocusOnTask } from './focus.js';
+import { openPaletteModal, accentDef } from '../palette.js';
 
 export function openTaskModal(id = null) {
   const t = id ? store.task(id) : null;
@@ -146,10 +147,12 @@ export function openSettingsModal() {
     <h2>Settings</h2>
     <div class="form-row">
       <label>Your name<input id="st-name" value="${escapeHtml(s.name)}"></label>
-      <label>Theme<select id="st-theme">
+      <label>Base<select id="st-theme">
         <option value="dark" ${s.theme === 'dark' ? 'selected' : ''}>Dark</option>
         <option value="light" ${s.theme === 'light' ? 'selected' : ''}>Light</option>
       </select></label>
+      <label>Accent colour<button class="btn" id="st-palette" type="button" style="width:100%;text-align:left">
+        <span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--amber);vertical-align:middle;margin-right:7px"></span>${escapeHtml(accentDef(s.accent).name)} — choose…</button></label>
     </div>
     <div class="form-row">
       <label>Day starts<input type="time" id="st-start" value="${s.dayStart}"></label>
@@ -195,6 +198,7 @@ export function openSettingsModal() {
     document.documentElement.dataset.theme = s.theme;
     store.save(); closeModal(); renderApp(); toast('Settings saved', 'success');
   };
+  box.querySelector('#st-palette').onclick = () => { closeModal(); openPaletteModal(); };
   box.querySelector('#st-cancel').onclick = closeModal;
   box.querySelector('#st-export').onclick = () => {
     const blob = new Blob([store.exportJson()], { type: 'application/json' });

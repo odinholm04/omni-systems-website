@@ -8,6 +8,7 @@ const defaults = () => ({
   settings: {
     name: 'Thor',
     theme: 'dark',
+    accent: 'amber',
     dayStart: '07:00',
     dayEnd: '18:00',
     capacityHours: 8,        // planned-work capacity per day

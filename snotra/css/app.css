@@ -15,6 +15,7 @@
   --red: #d97b6c;
   --blue: #7ba3c9;
   --purple: #a68bc9;
+  --on-accent: #0a0b0c;
   --font: 'Archivo', system-ui, -apple-system, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --radius: 10px;
@@ -62,8 +63,8 @@ input:focus, textarea:focus, select:focus { border-color: var(--amber); }
 }
 .brand { display: flex; gap: 10px; align-items: center; padding: 4px 8px 18px; }
 .brand-mark {
-  width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, var(--amber), #b06f1e);
-  color: #0a0b0c; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, var(--amber-bright), var(--amber));
+  color: var(--on-accent); font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center;
 }
 .brand-name { font-weight: 800; letter-spacing: .22em; font-size: 14px; }
 .brand-sub { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: .08em; }
@@ -82,7 +83,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--amber); }
   display: inline-flex; align-items: center; justify-content: center;
 }
 .nav-badge {
-  margin-left: auto; background: var(--amber); color: #0a0b0c; font-size: 11px; font-weight: 700;
+  margin-left: auto; background: var(--amber); color: var(--on-accent); font-size: 11px; font-weight: 700;
   border-radius: 99px; padding: 0 7px; line-height: 17px;
 }
 .sidebar-foot { margin-top: auto; display: flex; flex-direction: column; gap: 6px; }
@@ -107,7 +108,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--amber); }
   transition: background .12s, border-color .12s;
 }
 .btn:hover { background: var(--raised-2); border-color: var(--faint); }
-.btn.primary { background: var(--amber); border-color: var(--amber); color: #0a0b0c; }
+.btn.primary { background: var(--amber); border-color: var(--amber); color: var(--on-accent); }
 .btn.primary:hover { background: var(--amber-bright); }
 .btn.danger { color: var(--red); }
 .btn.ghost { background: transparent; border-color: transparent; color: var(--mute); }
@@ -384,7 +385,7 @@ input:focus, textarea:focus, select:focus { border-color: var(--amber); }
 .rank-badge { display: flex; align-items: center; gap: 12px; }
 .rank-rune {
   width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  font-size: 24px; color: #0a0b0c; background: linear-gradient(135deg, var(--amber), #b06f1e);
+  font-size: 24px; color: var(--on-accent); background: linear-gradient(135deg, var(--amber-bright), var(--amber));
   box-shadow: 0 0 18px rgba(232,163,61,.25);
 }
 .rank-name { font-weight: 800; font-size: 16px; letter-spacing: .04em; }
@@ -464,3 +465,22 @@ input:focus, textarea:focus, select:focus { border-color: var(--amber); }
   .notes-list { width: 100%; }
   .week-side { display: none; }
 }
+
+/* ---------- palette picker (accent personalization) ---------- */
+.palette-intro { color: var(--mute); font-size: 13px; margin: -6px 0 14px; }
+.base-toggle { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+.palette-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 720px) { .palette-grid { grid-template-columns: repeat(2, 1fr); } }
+.swatch-card {
+  text-align: left; border: 1px solid var(--line); border-radius: 12px; padding: 12px; cursor: pointer;
+  background: var(--panel); transition: border-color .12s, transform .08s; position: relative; overflow: hidden;
+}
+.swatch-card:hover { border-color: var(--line-strong); transform: translateY(-1px); }
+.swatch-card.selected { border-color: var(--sw); box-shadow: 0 0 0 1px var(--sw), 0 0 22px -6px var(--sw); }
+.swatch-head { display: flex; align-items: center; gap: 9px; margin-bottom: 7px; }
+.swatch-dot { width: 26px; height: 26px; min-width: 26px; border-radius: 8px; background: linear-gradient(135deg, var(--swb), var(--sw)); }
+.swatch-name { font-weight: 700; font-size: 14px; line-height: 1.1; }
+.swatch-chakra { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: .04em; text-transform: uppercase; }
+.swatch-meaning { font-size: 12px; color: var(--mute); line-height: 1.45; }
+.swatch-when { font-size: 11.5px; color: var(--sw); margin-top: 6px; font-weight: 600; }
+.swatch-card.selected .swatch-check { position: absolute; top: 10px; right: 10px; color: var(--sw); font-weight: 800; }

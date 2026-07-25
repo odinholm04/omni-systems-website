@@ -1,7 +1,7 @@
 // Snotra - task / event / settings modals.
 import * as store from '../store.js';
 import { escapeHtml, todayYmd, minutesToHM } from '../utils.js';
-import { showModal, closeModal, renderApp, toast } from '../app.js';
+import { showModal, closeModal, renderApp, toast, showShortcuts } from '../app.js';
 import { startFocusOnTask } from './focus.js';
 import { openPaletteModal, accentDef } from '../palette.js';
 
@@ -163,6 +163,9 @@ export function openSettingsModal() {
       <label>Daily deep-work goal (minutes)<input type="number" id="st-goal" min="30" step="15" value="${s.focusGoalMin}"></label>
     </div>
     <div class="form-row"><label style="flex:100%">Shutdown phrase<input id="st-phrase" value="${escapeHtml(s.shutdownPhrase)}"></label></div>
+    <h2 style="margin-top:20px">Keyboard shortcuts</h2>
+    <p class="muted" style="font-size:12.5px">Snotra is built to be driven from the keyboard. Open the full reference any time - or press <span class="kbd">?</span> from anywhere.</p>
+    <div class="modal-foot" style="margin-top:8px"><button class="btn" id="st-shortcuts" type="button">⌨ View all shortcuts</button></div>
     <h2 style="margin-top:20px">Ultrahuman ring</h2>
     <p class="muted" style="font-size:12.5px">Optional. Auto-fills your sleep score each morning so automatic quests judge themselves. Once you have a Partner API key, Snotra fetches your metrics directly (data stays in your browser).</p>
     <div class="chip" style="color:var(--amber-bright);border-color:rgba(232,163,61,.4);margin-bottom:10px">⏳ Partner API access requested from Ultrahuman &middot; pending approval</div>
@@ -201,6 +204,7 @@ export function openSettingsModal() {
     store.save(); closeModal(); renderApp(); toast('Settings saved', 'success');
   };
   box.querySelector('#st-palette').onclick = () => { closeModal(); openPaletteModal(); };
+  box.querySelector('#st-shortcuts').onclick = () => { closeModal(); showShortcuts(); };
   box.querySelector('#st-cancel').onclick = closeModal;
   box.querySelector('#st-export').onclick = () => {
     const blob = new Blob([store.exportJson()], { type: 'application/json' });

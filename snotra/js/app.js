@@ -68,13 +68,16 @@ export function toast(msg, type = '') {
 export function showModal(html) {
   const ov = document.getElementById('modal-overlay');
   const box = document.getElementById('modal-box');
+  box.onkeydown = null; // clear any handler a previous modal (e.g. triage) attached
   box.innerHTML = html;
   ov.hidden = false;
   return box;
 }
 export function closeModal() {
+  const box = document.getElementById('modal-box');
+  box.onkeydown = null;
   document.getElementById('modal-overlay').hidden = true;
-  document.getElementById('modal-box').innerHTML = '';
+  box.innerHTML = '';
 }
 export function modalOpen() { return !document.getElementById('modal-overlay').hidden; }
 
@@ -256,26 +259,39 @@ document.addEventListener('keydown', e => {
   else if (k === '?') showShortcuts();
 });
 
-function showShortcuts() {
+export function showShortcuts() {
+  const row = (keys, label) => `<div class="sc-row"><span class="sc-keys">${keys.map(k => `<span class="kbd">${k}</span>`).join('')}</span><span class="sc-label">${label}</span></div>`;
   showModal(`<h2>Keyboard shortcuts</h2>
-    <div class="grid cols-2" style="font-size:13.5px">
+    <p class="muted" style="font-size:12.5px;margin:-6px 0 14px">Shortcuts pause automatically while you are typing in a field.</p>
+    <div class="grid cols-2" style="gap:22px">
       <div>
-        <p><span class="kbd">Q</span> Quick add</p>
-        <p><span class="kbd">⌘K</span> Command palette</p>
-        <p><span class="kbd">1–7</span> Switch page</p>
-        <p><span class="kbd">P</span> Plan my day</p>
-        <p><span class="kbd">S</span> Shutdown ritual</p>
+        <div class="sc-group">Navigate</div>
+        ${row(['1'], 'Today')}
+        ${row(['2'], 'Tasks')}
+        ${row(['3'], 'Calendar')}
+        ${row(['4'], 'Notes')}
+        ${row(['5'], 'Focus')}
+        ${row(['6'], 'Goals')}
+        ${row(['7'], 'Insights')}
+        ${row(['8'], 'Rituals')}
+        <div class="sc-group" style="margin-top:12px">Find & run</div>
+        ${row(['⌘', 'K'], 'Command palette (search + run anything)')}
       </div>
       <div>
-        <p><span class="kbd">I</span> Triage inbox</p>
-        <p><span class="kbd">W</span> Weekly review</p>
-        <p><span class="kbd">F</span> Focus</p>
-        <p><span class="kbd">8</span> Rituals</p>
-        <p><span class="kbd">?</span> This help</p>
-        <p><span class="kbd">Esc</span> Close anything</p>
+        <div class="sc-group">Capture & plan</div>
+        ${row(['Q'], 'Quick add a task')}
+        ${row(['P'], 'Plan my day')}
+        ${row(['S'], 'Shutdown ritual')}
+        ${row(['I'], 'Triage inbox')}
+        ${row(['W'], 'Weekly review')}
+        ${row(['F'], 'Start a focus session')}
+        <div class="sc-group" style="margin-top:12px">General</div>
+        ${row(['?'], 'Show this sheet')}
+        ${row(['Esc'], 'Close any dialog')}
       </div>
     </div>
-    <div class="modal-foot"><span class="spacer"></span><button class="btn" onclick="document.getElementById('modal-overlay').hidden=true">Close</button></div>`);
+    <div class="modal-foot"><span class="spacer"></span><button class="btn primary" id="sc-close">Got it</button></div>`);
+  document.getElementById('sc-close').onclick = closeModal;
 }
 
 // overlay click-to-close

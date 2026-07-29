@@ -53,6 +53,29 @@ export function extractSleep(json) {
   return { score, hours };
 }
 
+// Recovery / movement indices (0-100) and step count from the same payload.
+// Same path-folding trick; each metric anchors on its own named segment.
+export function extractExtras(json) {
+  let recovery = null, movement = null, steps = 0;
+  const walk = (node, path) => {
+    if (node === null || node === undefined) return;
+    if (typeof node === 'object') {
+      let p = path;
+      if (typeof node.type === 'string') p += '/' + node.type.toLowerCase();
+      if (typeof node.title === 'string') p += '/' + node.title.toLowerCase();
+      Object.entries(node).forEach(([k, v]) => walk(v, p + '/' + k.toLowerCase()));
+      return;
+    }
+    if (typeof node !== 'number') return;
+    if (recovery === null && /\/recovery[_ ]?index(\/|$)/.test(path) && /(value|score|index)$/.test(path) && node >= 0 && node <= 100) recovery = Math.round(node);
+    if (movement === null && /\/movement[_ ]?index(\/|$)/.test(path) && /(value|score|index)$/.test(path) && node >= 0 && node <= 100) movement = Math.round(node);
+    // steps: the daily total is the largest plausible number in the steps subtree
+    if (/\/steps?(\/|$)/.test(path) && !/goal|target|timestamp|_at$|_time$/.test(path) && node > steps && node <= 200000 && Number.isInteger(node)) steps = node;
+  };
+  walk(json, '');
+  return { recovery, movement, steps: steps || null };
+}
+
 // One request: direct first (raw token, then Bearer on 401/403); if the browser
 // blocks the call outright (CORS -> TypeError), retry via the same-origin proxy.
 async function uhRequest(date, email, key) {
@@ -87,6 +110,10 @@ export async function fetchUltrahuman(date = todayYmd()) {
       const patch = { source: 'ultrahuman' };
       if (score !== null) patch.sleepScore = score;
       if (hours !== null) patch.sleepHours = hours;
+      const extra = extractExtras(json);
+      if (extra.recovery !== null) patch.recoveryIndex = extra.recovery;
+      if (extra.movement !== null) patch.movementIndex = extra.movement;
+      if (extra.steps !== null) patch.steps = extra.steps;
       store.setMetrics(date, patch);
       return patch;
     } catch (err) { lastErr = err; }

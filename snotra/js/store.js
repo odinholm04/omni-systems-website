@@ -15,11 +15,15 @@ const defaults = () => ({
     focusGoalMin: 180,       // daily deep-work goal (3h)
     shutdownPhrase: 'Alright, þá erum við búin í dag!',
     sound: true,
+    taskSort: 'smart',       // tasks page sort: smart|date|name|priority|created
+    taskSortDir: 'asc',
+    heroDesc: '',            // how Thor describes his hero (feeds future avatar art)
   },
   tasks: [],       // {id,title,notes,status,priority,inbox,project,tags,scheduled,time,durationMin,estimateMin,createdAt,completedAt,goalId,rollovers,order}
   events: [],      // {id,title,date,start,end,kind,taskIds:[],notes,createdAt}
   notes: [],       // {id,title,body,tags,pinned,daily,createdAt,updatedAt}
-  sessions: [],    // {id,taskId,mode,plannedMin,startedAt,endedAt,minutes,completed,distractions}
+  sessions: [],    // {id,taskId,mode,plannedMin,startedAt,endedAt,minutes,completed,distractions,rating,note}
+  worklog: [],     // clock in/out spans: {id,startedAt,endedAt|null} - lightweight "I'm working" tracking
   goals: [],       // {id,year,quarter,theme,why,priorities:[{id,title,metric,tag,done}]}
   habits: {        // The Daily Saga - morning + night rituals (sourced from the Notion brain)
     bedtime: '21:30',
@@ -56,16 +60,36 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (!raw) return seed(defaults());
     const data = JSON.parse(raw);
-    return {
+    return migrate({
       ...defaults(), ...data,
       settings: { ...defaults().settings, ...(data.settings || {}) },
       habits: { ...defaults().habits, ...(data.habits || {}) },
       sync: { ...defaults().sync, ...(data.sync || {}) },
-    };
+    });
   } catch (e) {
     console.error('Snotra: failed to load state, starting fresh', e);
     return seed(defaults());
   }
+}
+
+// One-time repairs on stored data. Safe to run on every load.
+function migrate(s) {
+  if (!Array.isArray(s.worklog)) s.worklog = [];
+  // A focus session left running past its block used to log wall-clock time
+  // (a 90 min block could record 32 h). Credit at most the planned block.
+  s.sessions.forEach(x => {
+    const cap = Math.max(1, x.plannedMin || 90);
+    if (x.minutes > cap + 5) {
+      x.minutes = cap;
+      x.endedAt = (x.startedAt || x.endedAt - cap * 60000) + cap * 60000;
+      x.repaired = true;
+    }
+  });
+  // A clock-in left open for over 24h was almost certainly forgotten - close it after 8h.
+  s.worklog.forEach(w => {
+    if (!w.endedAt && Date.now() - w.startedAt > 24 * 3600000) { w.endedAt = w.startedAt + 8 * 3600000; w.repaired = true; }
+  });
+  return s;
 }
 
 function seed(s) {
@@ -261,14 +285,45 @@ export function focusElapsedMs() {
 export function endFocus(completed) {
   const f = state.focus;
   if (!f) return null;
-  const minutes = Math.max(0, focusElapsedMs() / 60000);
+  // Credit at most the planned block - a timer forgotten overnight is not 32h of deep work.
+  const minutes = Math.min(Math.max(0, focusElapsedMs() / 60000), f.plannedMin);
   const rec = {
     id: uid(), taskId: f.taskId, mode: f.mode, plannedMin: f.plannedMin,
-    startedAt: f.startedAt - f.accumMs, endedAt: Date.now(),
+    startedAt: f.startedAt - f.accumMs, endedAt: (f.startedAt - f.accumMs) + Math.max(1, minutes) * 60000,
     minutes: Math.round(minutes * 10) / 10, completed, distractions: f.distractions,
+    rating: null, note: '',
   };
   if (rec.minutes >= 1) state.sessions.push(rec);
   state.focus = null; save(); return rec;
+}
+export function rateSession(id, rating, note) {
+  const s = state.sessions.find(x => x.id === id);
+  if (s) { s.rating = rating || null; s.note = (note || '').trim(); save(); }
+  return s;
+}
+
+// ---------- workday clock (in/out, lighter than a focus block) ----------
+export function activeWork() { return state.worklog.find(w => !w.endedAt) || null; }
+export function clockIn() {
+  if (activeWork()) return activeWork();
+  const w = { id: uid(), startedAt: Date.now(), endedAt: null };
+  state.worklog.push(w); save(); return w;
+}
+export function clockOut() {
+  const w = activeWork();
+  if (w) { w.endedAt = Date.now(); save(); }
+  return w;
+}
+// Blocks overlapping a date, clipped to that day (a span across midnight counts for both days).
+export function workBlocksOn(date) {
+  const d0 = new Date(date + 'T00:00').getTime(), d1 = d0 + 86400000;
+  return state.worklog
+    .map(w => ({ ...w, from: Math.max(w.startedAt, d0), to: Math.min(w.endedAt || Date.now(), d1) }))
+    .filter(w => w.to > w.from)
+    .sort((a, b) => a.from - b.from);
+}
+export function workMinOn(date) {
+  return Math.round(workBlocksOn(date).reduce((a, w) => a + (w.to - w.from), 0) / 60000);
 }
 export function focusMinOn(date) {
   const d0 = new Date(date + 'T00:00').getTime(), d1 = d0 + 86400000;
@@ -380,19 +435,42 @@ export function questsDoneCount(date) {
   return state.quests.filter(q => questDone(q, date)).length;
 }
 
+// The ring shapes the game: high recovery rolls a Berserker day (deep work pays 1.5x),
+// low recovery rolls a Healer day (rest and rituals pay extra). Recovery index leads;
+// sleep score stands in when the ring gives no recovery number.
+export function dayKind(date) {
+  const m = state.metrics[date];
+  if (!m) return null;
+  const r = m.recoveryIndex != null ? m.recoveryIndex : null;
+  const s = m.sleepScore != null ? m.sleepScore : null;
+  if (r !== null) return r >= 75 ? 'berserker' : (r < 45 ? 'healer' : 'steady');
+  if (s !== null) return s >= 85 ? 'berserker' : (s < 60 ? 'healer' : 'steady');
+  return null;
+}
+
 // XP: 5 per ritual step, +20 per completed ritual, +30 for a perfect day, +10 per quest-day.
+// Deep work pays 10 XP/hour - 15 on Berserker days. Healer days pay +15 for a guarded night.
 export function habitXp() {
   let xp = 0;
-  const dates = new Set([...Object.keys(state.habits.log), ...Object.keys(state.metrics)]);
+  const sessionsByDay = {};
+  state.sessions.forEach(s => {
+    const d = ymd(new Date(s.endedAt));
+    sessionsByDay[d] = (sessionsByDay[d] || 0) + s.minutes;
+  });
+  const dates = new Set([...Object.keys(state.habits.log), ...Object.keys(state.metrics), ...Object.keys(sessionsByDay)]);
   dates.forEach(d => {
     const l = state.habits.log[d];
+    const kind = dayKind(d);
     if (l) {
       xp += (checkedCount(l, 'm') + checkedCount(l, 'n')) * 5;
       if (ritualDone(d, 'm')) xp += 20;
       if (ritualDone(d, 'n')) xp += 20;
       if (perfectDay(d)) xp += 30;
+      if (kind === 'healer' && ritualDone(d, 'n')) xp += 15; // rest honored on a low-recovery day
     }
     xp += questsDoneCount(d) * 10;
+    const focusH = (sessionsByDay[d] || 0) / 60;
+    xp += Math.round(focusH * (kind === 'berserker' ? 15 : 10));
   });
   return xp;
 }

@@ -7,6 +7,33 @@ import { openPlanDay, openShutdown, openTriage } from './wizards.js';
 import { openEventModal, openTaskModal } from './modals.js';
 import { ritualStripHtml } from './rituals.js';
 
+// Odin's Counsel: the ring shapes today's plan. Berserker = strike hard,
+// Healer = guard your strength, Steady = solid honest work.
+export function counselHtml(t) {
+  const kind = store.dayKind(t);
+  if (!kind) return '';
+  const m = store.get().metrics[t] || {};
+  const stats = [
+    m.sleepScore != null ? `sleep ${m.sleepScore}` : null,
+    m.recoveryIndex != null ? `recovery ${m.recoveryIndex}` : null,
+    m.sleepHours != null ? `${m.sleepHours}h` : null,
+  ].filter(Boolean).join(' · ');
+  const C = {
+    berserker: { icon: '⚡', name: 'Berserker day', cls: 'berserker',
+      line: 'The ring says you are forged and ready. Strike the hardest task first - long blocks, 1.5x XP on deep work today.' },
+    steady: { icon: '🛡', name: 'Steady day', cls: 'steady',
+      line: 'Solid foundations. Work the plan, honest blocks, no heroics needed.' },
+    healer: { icon: '🌿', name: 'Healer day', cls: 'healer',
+      line: 'The ring counsels mercy. Shorter blocks, lighter load, guard the night ritual - it pays +15 XP today.' },
+  }[kind];
+  return `<div class="card counsel ${C.cls}" title="${stats}">
+    <span class="counsel-icon">${C.icon}</span>
+    <div><b>${C.name}</b> <span class="mono faint" style="font-size:11px">${stats}</span>
+      <div class="muted" style="font-size:12.5px">${C.line}</div></div>
+    <span class="help" data-help="Odin's Counsel reads your ring each morning. Recovery 75+ rolls a Berserker day (deep work pays 1.5x XP). Recovery under 45 rolls a Healer day (rest and the night ritual pay extra). In between: steady work.">?</span>
+  </div>`;
+}
+
 export function renderToday(el) {
   const t = todayYmd();
   const s = store.get().settings;
@@ -40,6 +67,8 @@ export function renderToday(el) {
   </div>
 
   ${ritualStripHtml()}
+
+  ${counselHtml(t)}
 
   <div class="stat-tiles">
     <div class="stat-tile accent"><div class="sv">${minutesToHM(focusMin)}</div><div class="sl">deep work today · goal ${minutesToHM(s.focusGoalMin)}</div></div>

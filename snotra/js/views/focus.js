@@ -1,7 +1,8 @@
-// Snotra - Focus: deep work timer bound to tasks, distraction parking, session log.
+// Snotra - Focus: deep work timer bound to tasks, distraction parking, session log,
+// plus the workday clock (clock in/out - lighter than a focus block).
 import * as store from '../store.js';
 import { escapeHtml, minutesToHM, todayYmd } from '../utils.js';
-import { navigate, renderApp, toast, currentRoute } from '../app.js';
+import { navigate, renderApp, toast, currentRoute, showModal, closeModal } from '../app.js';
 
 const PRESETS = [
   { key: 'pomodoro', name: 'Pomodoro', min: 25, sub: '25 min · quick wins' },
@@ -53,29 +54,92 @@ function setupHtml() {
     </div>
 
     <div class="focus-stats-row">
-      <div><b>${minutesToHM(focusMin)}</b>today · goal ${minutesToHM(s.focusGoalMin)}</div>
+      <div><b>${minutesToHM(focusMin)}</b>deep today · goal ${minutesToHM(s.focusGoalMin)}</div>
       <div><b>${sessionsToday.length}</b>sessions today</div>
       <div><b>${streak > 0 ? '🔥 ' + streak : '0'}</b>day streak</div>
       <div><b>${minutesToHM(weekFocus())}</b>this week</div>
     </div>
+
+    ${workdayCard()}
+
     ${sessionsToday.length ? `
     <div class="card" style="max-width:520px;margin:26px auto 0;text-align:left">
-      <h2>Today's sessions</h2>
+      <h2>Today's sessions <span class="help" data-help="Every deep-work block you ran today. Rate a session (1-10) and jot a line about how it went - future you learns from it.">?</span></h2>
       ${sessionsToday.map(x => {
         const task = x.taskId ? store.task(x.taskId) : null;
         return `<div class="tlm-row">
           <span class="tlm-time">${new Date(x.startedAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}</span>
-          <span class="tlm-title">${task ? escapeHtml(task.title) : 'General deep work'}</span>
-          <span class="tlm-kind">${minutesToHM(x.minutes)}${x.completed ? '' : ' · stopped early'}${x.distractions ? ` · ${x.distractions} parked` : ''}</span>
+          <span class="tlm-title">${task ? escapeHtml(task.title) : 'General deep work'}${x.note ? `<span class="faint" style="display:block;font-size:11px">${escapeHtml(x.note)}</span>` : ''}</span>
+          <span class="tlm-kind">${minutesToHM(x.minutes)}${x.completed ? '' : ' · stopped early'}${x.distractions ? ` · ${x.distractions} parked` : ''}${x.rating ? ` · ★ ${x.rating}/10` : ''}</span>
+          <button class="icon-btn" data-rate="${x.id}" title="Rate this session">${x.rating ? '✎' : '★'}</button>
         </div>`;
       }).join('')}
     </div>` : ''}`;
+}
+
+// ---------- workday clock ----------
+function workdayCard() {
+  const t = todayYmd();
+  const active = store.activeWork();
+  const blocks = store.workBlocksOn(t);
+  const fmt = ms => new Date(ms).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  const spans = blocks.map(w => `${fmt(w.from)}-${w.endedAt ? fmt(w.to) : 'now'}`).join(' · ');
+  return `
+    <div class="card workday ${active ? 'on' : ''}" style="max-width:520px;margin:26px auto 0;text-align:left">
+      <h2>Workday <span class="help" data-help="Lighter than a focus block: clock in when you start working, clock out for lunch or when you stop. Snotra adds up your real working hours for the day - no timer to babysit.">?</span>
+        <span class="spacer"></span>
+        <span class="mono ${active ? 'work-live' : 'faint'}" id="wk-total" style="font-size:12px">${minutesToHM(store.workMinOn(t))} worked</span>
+      </h2>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn ${active ? '' : 'primary'}" id="wk-toggle">${active ? '⏹ Clock out' : '⏵ Clock in'}</button>
+        <span class="faint mono" style="font-size:11.5px">${spans || 'Not clocked in yet today'}</span>
+      </div>
+    </div>`;
+}
+
+// ---------- session rating ----------
+export function openRateModal(sessionId) {
+  const sRec = store.get().sessions.find(x => x.id === sessionId);
+  if (!sRec) return;
+  const box = showModal(`
+    <h2>How did that session go?</h2>
+    <p class="muted" style="font-size:12.5px">Optional - a 10-second log that compounds. Rate the quality of the work, not the mood.</p>
+    <div class="rate-row" id="rr">${Array.from({ length: 10 }, (_, i) => `<button class="rate-pip ${sRec.rating === i + 1 ? 'active' : ''}" data-r="${i + 1}">${i + 1}</button>`).join('')}</div>
+    <label style="display:block;margin-top:12px">Notes (what worked, what pulled at you?)
+      <textarea id="rt-note" rows="3" style="width:100%" placeholder="e.g. Great flow after the first 15 min. Phone out of the room helped.">${escapeHtml(sRec.note || '')}</textarea></label>
+    <div class="modal-foot">
+      <span class="spacer"></span>
+      <button class="btn" id="rt-skip">Skip</button>
+      <button class="btn primary" id="rt-save">Save</button>
+    </div>`);
+  let chosen = sRec.rating || null;
+  box.querySelectorAll('.rate-pip').forEach(b => b.onclick = () => {
+    chosen = Number(b.dataset.r);
+    box.querySelectorAll('.rate-pip').forEach(x => x.classList.toggle('active', Number(x.dataset.r) === chosen));
+  });
+  box.querySelector('#rt-skip').onclick = closeModal;
+  box.querySelector('#rt-save').onclick = () => {
+    store.rateSession(sessionId, chosen, box.querySelector('#rt-note').value);
+    closeModal(); renderApp();
+    toast('Session logged' + (chosen ? `: ★ ${chosen}/10` : ''), 'success');
+  };
 }
 
 function wireSetup(el) {
   el.querySelectorAll('[data-preset]').forEach(p => p.onclick = () => {
     chosenPreset = p.dataset.preset; renderFocus(el);
   });
+  el.querySelector('#wk-toggle').onclick = () => {
+    if (store.activeWork()) {
+      store.clockOut();
+      toast(`⏹ Clocked out - ${minutesToHM(store.workMinOn(todayYmd()))} worked today`, 'success');
+    } else {
+      store.clockIn();
+      toast('⏵ Clocked in. Go get it.', 'success');
+    }
+    renderFocus(el);
+  };
+  el.querySelectorAll('[data-rate]').forEach(b => b.onclick = () => openRateModal(b.dataset.rate));
   const sel = el.querySelector('#fc-task');
   sel.onchange = () => { chosenTaskId = sel.value || null; };
   el.querySelector('#fc-start').onclick = () => {
@@ -142,6 +206,7 @@ function finishSession(el, completedBlock) {
   const s = store.get().settings;
   if (store.focusMinOn(todayYmd()) >= s.focusGoalMin) toast(`🔥 Daily deep-work goal hit (${minutesToHM(s.focusGoalMin)})!`, 'success');
   renderFocus(el);
+  if (rec && rec.minutes >= 1) openRateModal(rec.id);
 }
 
 function clockStr(ms) {
@@ -160,15 +225,19 @@ function weekFocus() {
   return Math.round(sum);
 }
 
-// Called every second from app.js - updates running clock, mini timer, tab title.
-let notified = false;
+// Called every second from app.js - updates running clock, mini timer, tab title,
+// and ENDS the session when the block is up (a forgotten timer must never keep counting).
 export function focusTick() {
   const f = store.get().focus;
   const mini = document.getElementById('mini-focus');
   if (!f) {
-    mini.hidden = true;
+    if (mini) mini.hidden = true;
     if (document.title !== 'Snotra - your unified brain') document.title = 'Snotra - your unified brain';
-    notified = false;
+    // keep the live workday counter fresh on the focus page
+    if (currentRoute === 'focus' && store.activeWork()) {
+      const wk = document.getElementById('wk-total');
+      if (wk) wk.textContent = `${minutesToHM(store.workMinOn(todayYmd()))} worked`;
+    }
     return;
   }
   const elapsed = store.focusElapsedMs();
@@ -188,13 +257,17 @@ export function focusTick() {
     if (ring) ring.style.width = Math.min(100, elapsed / (f.plannedMin * 600)) + '%';
   }
 
-  if (remaining === 0 && !notified && !f.pausedAt) {
-    notified = true;
+  if (remaining === 0 && !f.pausedAt) {
+    // Time's up: close the session NOW, crediting exactly the planned block.
+    const rec = store.endFocus(true);
+    chosenTaskId = null;
     chime();
     if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
-      new Notification('Snotra - block complete', { body: task ? `“${task.title}” block done. Take a real break.` : 'Deep work block done. Take a real break.' });
+      new Notification('Snotra - block complete', { body: task ? `“${task.title}” block done (${minutesToHM(rec.minutes)} logged). Take a real break.` : `Deep work block done (${minutesToHM(rec.minutes)} logged). Take a real break.` });
     }
-    toast('⏰ Block complete - finish up and take a break', 'warn');
+    toast(`⏰ Block complete - <b>${minutesToHM(rec.minutes)}</b> logged. Take a real break.`, 'success');
+    renderApp();
+    if (currentRoute === 'focus') openRateModal(rec.id);
   }
 }
 

@@ -5,6 +5,18 @@ import { showModal, closeModal, renderApp, toast } from '../app.js';
 
 // ============ PLAN MY DAY ============
 // yesterday's leftovers → pick today's tasks → estimates + capacity → timeblock top task
+// One-line ring guidance inside the planning wizard.
+function counselLine(t) {
+  const kind = store.dayKind(t);
+  if (!kind) return '';
+  const line = {
+    berserker: '⚡ <b>Berserker day</b> - the ring says strike hard. Front-load the toughest task; deep work pays 1.5x XP.',
+    steady: '🛡 <b>Steady day</b> - work the plan with honest blocks.',
+    healer: '🌿 <b>Healer day</b> - the ring counsels a lighter load today. Pick fewer, smaller tasks and guard the night.',
+  }[kind];
+  return `<p class="counsel-line ${kind}" style="font-size:12.5px">${line}</p>`;
+}
+
 export function openPlanDay() {
   const t = todayYmd();
   const leftovers = store.overdueTasks();
@@ -54,6 +66,7 @@ function planStepPick(t) {
     const box = showModal(`
       ${wsteps(['Leftovers', 'Pick tasks', 'Capacity', 'Timeblock'], 1)}
       <h2>What deserves today?</h2>
+      ${counselLine(t)}
       <p class="muted" style="font-size:13px;margin-top:-8px">Already on today: <b>${store.tasksFor(t).filter(x => x.status !== 'done').length}</b> task(s). Add from inbox & backlog - be ambitious, we'll check capacity next.</p>
       <div style="max-height:44vh;overflow-y:auto">${rows || '<div class="empty">Backlog and inbox are empty.</div>'}</div>
       <div class="modal-foot">

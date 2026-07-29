@@ -9,9 +9,11 @@ import { renderFocus, focusTick, startFocusOnTask } from './views/focus.js';
 import { renderGoals } from './views/goals.js';
 import { renderInsights } from './views/insights.js';
 import { renderRituals } from './views/rituals.js';
+import { renderHero } from './views/hero.js';
 import { openPlanDay, openShutdown, openWeeklyReview, openTriage } from './views/wizards.js';
 import { openTaskModal, openEventModal, openSettingsModal } from './views/modals.js';
 import { applyAccent, openPaletteModal } from './palette.js';
+import { enhanceSelects, closeOpenDropdown } from './dropdown.js';
 
 const routes = {
   today: renderToday,
@@ -20,6 +22,7 @@ const routes = {
   notes: renderNotes,
   focus: renderFocus,
   goals: renderGoals,
+  hero: renderHero,
   insights: renderInsights,
   rituals: renderRituals,
 };
@@ -76,6 +79,7 @@ export function showModal(html) {
 export function closeModal() {
   const box = document.getElementById('modal-box');
   box.onkeydown = null;
+  closeOpenDropdown();
   document.getElementById('modal-overlay').hidden = true;
   box.innerHTML = '';
 }
@@ -140,6 +144,7 @@ function paletteCommands() {
     { k: '6', t: 'Go to Goals', run: () => navigate('goals') },
     { k: '7', t: 'Go to Insights', run: () => navigate('insights') },
     { k: '8', t: 'Go to Rituals (morning & night routine)', run: () => navigate('rituals') },
+    { k: '9', t: 'Go to Hero (your character & ranks)', run: () => navigate('hero') },
     { k: 'Q', t: 'Quick add task', run: () => openQuickAdd() },
     { k: 'P', t: 'Plan my day', run: () => openPlanDay() },
     { k: 'S', t: 'Shutdown ritual', run: () => openShutdown() },
@@ -243,12 +248,12 @@ document.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (gPending) {
     gPending = false;
-    const map = { '1': 'today', '2': 'tasks', '3': 'calendar', '4': 'notes', '5': 'focus', '6': 'goals', '7': 'insights', '8': 'rituals', t: 'today', k: 'tasks', c: 'calendar', n: 'notes', f: 'focus', r: 'rituals' };
+    const map = { '1': 'today', '2': 'tasks', '3': 'calendar', '4': 'notes', '5': 'focus', '6': 'goals', '7': 'insights', '8': 'rituals', '9': 'hero', t: 'today', k: 'tasks', c: 'calendar', n: 'notes', f: 'focus', r: 'rituals' };
     if (map[k]) { navigate(map[k]); return; }
   }
   if (k === 'g') { gPending = true; setTimeout(() => gPending = false, 900); return; }
-  if (k >= '1' && k <= '8') {
-    navigate(['today', 'tasks', 'calendar', 'notes', 'focus', 'goals', 'insights', 'rituals'][+k - 1]); return;
+  if (k >= '1' && k <= '9') {
+    navigate(['today', 'tasks', 'calendar', 'notes', 'focus', 'goals', 'insights', 'rituals', 'hero'][+k - 1]); return;
   }
   if (k === 'q') { e.preventDefault(); openQuickAdd(); }
   else if (k === 'p') openPlanDay();
@@ -274,6 +279,7 @@ export function showShortcuts() {
         ${row(['6'], 'Goals')}
         ${row(['7'], 'Insights')}
         ${row(['8'], 'Rituals')}
+        ${row(['9'], 'Hero')}
         <div class="sc-group" style="margin-top:12px">Find & run</div>
         ${row(['⌘', 'K'], 'Command palette (search + run anything)')}
       </div>
@@ -293,6 +299,12 @@ export function showShortcuts() {
     <div class="modal-foot"><span class="spacer"></span><button class="btn primary" id="sc-close">Got it</button></div>`);
   document.getElementById('sc-close').onclick = closeModal;
 }
+
+// Custom dropdowns: upgrade every select, now and whenever a view/modal re-renders.
+const ddObserver = new MutationObserver(() => enhanceSelects(document.body));
+ddObserver.observe(document.getElementById('view'), { childList: true, subtree: true });
+ddObserver.observe(document.getElementById('modal-box'), { childList: true, subtree: true });
+enhanceSelects(document.body);
 
 // overlay click-to-close
 ['quickadd-overlay', 'palette-overlay', 'modal-overlay'].forEach(id => {
@@ -369,7 +381,21 @@ setTimeout(() => reminderCheck(), 2500);
 window.addEventListener('hashchange', renderApp);
 store.onChange(() => updateBadges());
 // Fellowship auto-publish: any saved change refreshes your published saga stats (debounced).
-import('./sync.js').then(sync => store.onChange(() => sync.schedulePublish()));
+// Also collect incoming nudges on boot and every 10 minutes - delivered as toasts + notifications.
+import('./sync.js').then(sync => {
+  store.onChange(() => sync.schedulePublish());
+  const deliverNudges = async () => {
+    const nudges = await sync.takeNudges();
+    nudges.forEach(n => {
+      toast(`⚡ <b>${escapeHtml(n.from_name)}</b>: ${escapeHtml(n.message)}`, 'warn');
+      if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+        new Notification(`⚡ Nudge from ${n.from_name}`, { body: n.message });
+      }
+    });
+  };
+  deliverNudges();
+  setInterval(deliverNudges, 10 * 60 * 1000);
+});
 // Ultrahuman auto-sync: on boot, every 15 min, and when the tab becomes visible again -
 // so a PWA left open overnight still picks up the new morning without a full reload.
 // The failure toast fires at most once per day; retries stay quiet.

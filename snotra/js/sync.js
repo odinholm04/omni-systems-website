@@ -108,6 +108,29 @@ export function removeFriend(code) {
   store.save();
 }
 
+// ---------- nudges ----------
+// Poke a companion whose saga has stalled. One nudge per friend per hour (server-enforced).
+export async function sendNudge(friendCode, message) {
+  const s = store.get().sync;
+  if (!s.code) throw new Error('Forge your own share code first');
+  const ok = await rpc('snotra_nudge', {
+    p_from_code: s.code, p_from_secret: s.secret,
+    p_to_code: friendCode, p_message: message || 'Your fellowship calls: the saga waits!',
+  });
+  if (!ok) throw new Error('Nudge not sent - you may have nudged them within the hour');
+  return true;
+}
+
+// Collect nudges sent to me (delivered once, then gone server-side).
+export async function takeNudges() {
+  const s = store.get().sync;
+  if (!s.code) return [];
+  try {
+    const rows = await rpc('snotra_take_nudges', { p_code: s.code, p_secret: s.secret });
+    return rows || [];
+  } catch (e) { return []; }
+}
+
 let lastRefresh = 0;
 export async function refreshFriends(force = false) {
   const s = store.get().sync;

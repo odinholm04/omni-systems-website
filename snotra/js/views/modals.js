@@ -167,12 +167,11 @@ export function openSettingsModal() {
     <p class="muted" style="font-size:12.5px">Snotra is built to be driven from the keyboard. Open the full reference any time - or press <span class="kbd">?</span> from anywhere.</p>
     <div class="modal-foot" style="margin-top:8px"><button class="btn" id="st-shortcuts" type="button">⌨ View all shortcuts</button></div>
     <h2 style="margin-top:20px">Ultrahuman ring</h2>
-    <p class="muted" style="font-size:12.5px">Optional. Auto-fills your sleep score each morning so automatic quests judge themselves. Once you have a Partner API key, Snotra fetches your metrics directly (data stays in your browser).</p>
-    <div class="chip" style="color:var(--amber-bright);border-color:rgba(232,163,61,.4);margin-bottom:10px">⏳ Partner API access requested from Ultrahuman &middot; pending approval</div>
-    <p class="faint" style="font-size:11.5px;margin:0 0 10px">Access is granted by application (typically 1-2 weeks). Until the key arrives, use <b>Log sleep</b> on the Rituals page to enter your score manually; auto-sync switches on the moment you paste the key below.</p>
+    <p class="muted" style="font-size:12.5px">Auto-fills your sleep score each morning so automatic quests judge themselves. Paste the auth token from the Ultrahuman Partner API email below; it stays in this browser only.</p>
+    <p class="faint" style="font-size:11.5px;margin:0 0 10px">One-time pairing: in the Ultrahuman app go to <b>Profile &rarr; Settings &rarr; Partner ID</b> and enter the Partner Code from that same email. Email is optional here (only needed when reading someone else's linked ring). Sync runs on app open, or press <b>Sync ring</b> on the Rituals page.</p>
     <div class="form-row">
-      <label>Account email<input id="st-uhemail" type="email" value="${escapeHtml(s.uhEmail || '')}" placeholder="you@example.com"></label>
-      <label>Partner API key<input id="st-uhkey" type="password" value="${escapeHtml(s.uhKey || '')}" placeholder="uh_…"></label>
+      <label>Account email (optional)<input id="st-uhemail" type="email" value="${escapeHtml(s.uhEmail || '')}" placeholder="you@example.com"></label>
+      <label>Auth token<input id="st-uhkey" type="password" value="${escapeHtml(s.uhKey || '')}" placeholder="eyJ…"></label>
     </div>
     <h2 style="margin-top:20px">Data</h2>
     <p class="muted" style="font-size:13px">Everything lives in this browser's local storage. Export a backup regularly - it's a plain JSON file you can re-import anywhere.</p>
@@ -189,6 +188,7 @@ export function openSettingsModal() {
     </div>`);
 
   box.querySelector('#st-save').onclick = () => {
+    const prevUhKey = s.uhKey;
     Object.assign(s, {
       name: box.querySelector('#st-name').value.trim() || 'Friend',
       theme: box.querySelector('#st-theme').value,
@@ -202,6 +202,15 @@ export function openSettingsModal() {
     });
     document.documentElement.dataset.theme = s.theme;
     store.save(); closeModal(); renderApp(); toast('Settings saved', 'success');
+    // New or changed ring token: test it immediately so a bad paste is caught on the spot.
+    if (s.uhKey && s.uhKey !== prevUhKey) {
+      import('../metrics.js').then(({ fetchUltrahuman }) => {
+        toast('◉ Testing ring connection…');
+        fetchUltrahuman()
+          .then(r => { toast(`◉ Ring connected: sleep score ${r.sleepScore ?? '-'}`, 'success'); renderApp(); })
+          .catch(err => toast(`◉ Ring test failed: ${escapeHtml(err.message)}`, 'warn'));
+      });
+    }
   };
   box.querySelector('#st-palette').onclick = () => { closeModal(); openPaletteModal(); };
   box.querySelector('#st-shortcuts').onclick = () => { closeModal(); showShortcuts(); };

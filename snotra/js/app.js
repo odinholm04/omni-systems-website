@@ -370,12 +370,29 @@ window.addEventListener('hashchange', renderApp);
 store.onChange(() => updateBadges());
 // Fellowship auto-publish: any saved change refreshes your published saga stats (debounced).
 import('./sync.js').then(sync => store.onChange(() => sync.schedulePublish()));
-// Ultrahuman auto-sync: once per day on boot if the ring is configured and no data yet.
+// Ultrahuman auto-sync: on boot, every 15 min, and when the tab becomes visible again -
+// so a PWA left open overnight still picks up the new morning without a full reload.
+// The failure toast fires at most once per day; retries stay quiet.
 import('./metrics.js').then(({ fetchUltrahuman }) => {
-  const s = store.get();
-  if (s.settings.uhKey && s.settings.uhEmail && !s.metrics[todayYmd()]) {
-    fetchUltrahuman().then(r => toast(`◉ Ring synced: sleep score ${r.sleepScore ?? '-'}`, 'success')).catch(() => {});
-  }
+  let syncing = false, warnedOn = null;
+  const trySync = () => {
+    const s = store.get();
+    if (syncing || !s.settings.uhKey || s.metrics[todayYmd()]) return;
+    syncing = true;
+    fetchUltrahuman().then(r => {
+      toast(`◉ Ring synced: sleep score ${r.sleepScore ?? '-'}`, 'success');
+      renderApp(); // metric quests judge themselves off the fresh score
+    }).catch(err => {
+      // Never fail silently: Settings promises "sync runs on app open".
+      if (warnedOn !== todayYmd()) {
+        warnedOn = todayYmd();
+        toast(`◉ Ring sync failed: ${escapeHtml(err.message)} - check Settings, or log sleep manually`, 'warn');
+      }
+    }).finally(() => { syncing = false; });
+  };
+  trySync();
+  setInterval(trySync, 15 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) trySync(); });
 });
 applyTheme();
 if (!location.hash) location.hash = '#/today';

@@ -153,14 +153,17 @@ export function exportJson() {
   return JSON.stringify(state, null, 2);
 }
 export function importJson(json) {
-  const data = JSON.parse(json);
+  replaceState(JSON.parse(json));
+}
+// Wholesale state replacement (backup import / cloud pull). Runs migrations too.
+export function replaceState(data) {
   if (!data || typeof data !== 'object' || !Array.isArray(data.tasks)) throw new Error('Not a Snotra backup file');
-  state = {
+  state = migrate({
     ...defaults(), ...data,
     settings: { ...defaults().settings, ...(data.settings || {}) },
     habits: { ...defaults().habits, ...(data.habits || {}) },
     sync: { ...defaults().sync, ...(data.sync || {}) },
-  };
+  });
   localStorage.setItem(KEY, JSON.stringify(state));
   listeners.forEach(fn => fn());
 }

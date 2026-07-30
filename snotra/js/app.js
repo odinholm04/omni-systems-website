@@ -420,9 +420,37 @@ import('./metrics.js').then(({ fetchUltrahuman }) => {
   setInterval(trySync, 15 * 60 * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) trySync(); });
 });
+// Cloud sync: pull on boot / sign-in / tab-focus, push (debounced) on every change.
+import('./cloud.js').then(cloud => {
+  cloud.init(() => { toast('☁ Synced from your cloud', 'success'); renderApp(); });
+});
+
 applyTheme();
 if (!location.hash) location.hash = '#/today';
 renderApp();
+
+// First run on a fresh device: offer the account (sync pulls everything down),
+// without ever forcing a login wall on a device already in use.
+import('./auth.js').then(({ user }) => {
+  const WELCOME = 'snotra.welcomed.v1';
+  const st = store.get();
+  // "Fresh device" = only seed tasks, no real activity. Rendering Today creates an
+  // empty habit-log row for the day, so judge by CONTENT, not by key count.
+  const fresh = st.tasks.length <= 3 && st.sessions.length === 0 && Object.keys(st.metrics).length === 0
+    && !Object.values(st.habits.log).some(l => (l.m && l.m.length) || (l.n && l.n.length) || (l.q && l.q.length));
+  if (localStorage.getItem(WELCOME) || user() || !fresh) return;
+  localStorage.setItem(WELCOME, '1');
+  const box = showModal(`
+    <h2>Welcome to Snotra</h2>
+    <p class="muted" style="font-size:13px">First time on this device. If you already have a Snotra account, sign in and everything you own appears here. Otherwise start fresh - local only, no account needed - and connect one later in Settings.</p>
+    <div class="modal-foot" style="margin-top:10px">
+      <button class="btn primary" id="wl-signin">☁ Sign in / create account</button>
+      <span class="spacer"></span>
+      <button class="btn" id="wl-local">Continue without account</button>
+    </div>`);
+  box.querySelector('#wl-signin').onclick = () => { closeModal(); openSettingsModal(); };
+  box.querySelector('#wl-local').onclick = closeModal;
+});
 
 // First-open-of-day nudges: rituals + planning.
 (() => {

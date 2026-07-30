@@ -4,6 +4,8 @@ import { escapeHtml, todayYmd, minutesToHM } from '../utils.js';
 import { showModal, closeModal, renderApp, toast, showShortcuts } from '../app.js';
 import { startFocusOnTask } from './focus.js';
 import { openPaletteModal, accentDef } from '../palette.js';
+import * as auth from '../auth.js';
+import * as cloud from '../cloud.js';
 
 export function openTaskModal(id = null) {
   const t = id ? store.task(id) : null;
@@ -173,8 +175,32 @@ export function openSettingsModal() {
       <label>Account email (optional)<input id="st-uhemail" type="email" value="${escapeHtml(s.uhEmail || '')}" placeholder="you@example.com"></label>
       <label>Auth token<input id="st-uhkey" type="password" value="${escapeHtml(s.uhKey || '')}" placeholder="eyJ…"></label>
     </div>
+    <h2 style="margin-top:20px">Account & cloud sync <span class="help" data-help="Optional but recommended: your whole Snotra follows you to any device and survives a wiped browser. Sign in once per device - the session keeps itself alive. Everything syncs to your own private database row that only your account can read.">?</span></h2>
+    ${auth.user() ? `
+    <div class="ac-box">
+      <div class="ac-row"><span class="chip" style="color:var(--green)">● signed in</span> <b>${escapeHtml(auth.user().email || '')}</b>
+        <span class="spacer"></span>
+        <span class="mono faint" style="font-size:11px" id="ac-status">${cloud.lastSyncAt ? 'synced ' + new Date(cloud.lastSyncAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : 'not synced yet'}</span>
+      </div>
+      <div class="modal-foot" style="margin-top:8px">
+        <button class="btn" id="ac-sync">☁ Sync now</button>
+        <button class="btn ghost" id="ac-signout">Sign out</button>
+      </div>
+      ${cloud.lastError ? `<p class="faint" style="font-size:11px;color:var(--red)">cloud: ${escapeHtml(cloud.lastError)}</p>` : ''}
+    </div>` : `
+    <div class="ac-box">
+      <p class="muted" style="font-size:12.5px;margin-top:0">No account yet on this device. Create one (or sign in) and your data syncs everywhere; skip it and everything simply stays local.</p>
+      <div class="form-row">
+        <label>Email<input id="ac-email" type="email" placeholder="you@example.com" autocomplete="username"></label>
+        <label>Password<input id="ac-pass" type="password" placeholder="8+ characters" autocomplete="current-password"></label>
+      </div>
+      <div class="modal-foot" style="margin-top:4px">
+        <button class="btn primary" id="ac-signin">Sign in</button>
+        <button class="btn" id="ac-signup">Create account</button>
+      </div>
+    </div>`}
     <h2 style="margin-top:20px">Data</h2>
-    <p class="muted" style="font-size:13px">Everything lives in this browser's local storage. Export a backup regularly - it's a plain JSON file you can re-import anywhere.</p>
+    <p class="muted" style="font-size:13px">${auth.user() ? 'Your data lives in this browser AND in your private cloud row. Backups still never hurt.' : "Everything lives in this browser's local storage. Export a backup regularly - it's a plain JSON file you can re-import anywhere."}</p>
     <div class="modal-foot" style="margin-top:8px">
       <button class="btn" id="st-export">⬇ Export backup</button>
       <button class="btn" id="st-import">⬆ Import backup</button>
@@ -215,6 +241,61 @@ export function openSettingsModal() {
   box.querySelector('#st-palette').onclick = () => { closeModal(); openPaletteModal(); };
   box.querySelector('#st-shortcuts').onclick = () => { closeModal(); showShortcuts(); };
   box.querySelector('#st-cancel').onclick = closeModal;
+
+  // account & cloud
+  const acCreds = () => {
+    const email = box.querySelector('#ac-email').value.trim();
+    const pass = box.querySelector('#ac-pass').value;
+    if (!email || !pass) { toast('Email and password, both', 'warn'); return null; }
+    if (pass.length < 8) { toast('Password needs 8+ characters', 'warn'); return null; }
+    return { email, pass };
+  };
+  const acSignin = box.querySelector('#ac-signin');
+  if (acSignin) acSignin.onclick = async () => {
+    const c = acCreds(); if (!c) return;
+    acSignin.disabled = true; acSignin.textContent = 'Signing in…';
+    try {
+      await auth.signIn(c.email, c.pass);
+      toast('☁ Signed in - syncing…', 'success');
+      closeModal(); openSettingsModal();
+    } catch (e) {
+      toast('Sign in failed: ' + escapeHtml(e.message), 'warn');
+      acSignin.disabled = false; acSignin.textContent = 'Sign in';
+    }
+  };
+  const acSignup = box.querySelector('#ac-signup');
+  if (acSignup) acSignup.onclick = async () => {
+    const c = acCreds(); if (!c) return;
+    acSignup.disabled = true; acSignup.textContent = 'Creating…';
+    try {
+      const r = await auth.signUp(c.email, c.pass);
+      if (r.needsConfirm) {
+        toast('Account created - check your email to confirm, then sign in here', 'warn');
+        acSignup.textContent = 'Create account'; acSignup.disabled = false;
+      } else {
+        toast('☁ Account created and signed in', 'success');
+        closeModal(); openSettingsModal();
+      }
+    } catch (e) {
+      toast('Could not create account: ' + escapeHtml(e.message), 'warn');
+      acSignup.disabled = false; acSignup.textContent = 'Create account';
+    }
+  };
+  const acSignout = box.querySelector('#ac-signout');
+  if (acSignout) acSignout.onclick = async () => {
+    await auth.signOut();
+    toast('Signed out - data stays on this device', 'success');
+    closeModal(); openSettingsModal();
+  };
+  const acSync = box.querySelector('#ac-sync');
+  if (acSync) acSync.onclick = async () => {
+    acSync.disabled = true; acSync.textContent = '☁ Syncing…';
+    const r = await cloud.syncNow();
+    const msg = { 'in-sync': 'Already in sync', pulled: 'Pulled newer data from the cloud', 'pulled-conflict': 'Cloud version was newer - applied it', pushed: 'Pushed your latest changes', 'pushed-conflict': 'Your local version was newer - pushed it', 'first-push': 'First backup pushed to the cloud', error: 'Sync failed: ' + (cloud.lastError || 'unknown') }[r] || r;
+    toast(msg, r === 'error' ? 'warn' : 'success');
+    if (r === 'pulled' || r === 'pulled-conflict') renderApp();
+    closeModal(); openSettingsModal();
+  };
   box.querySelector('#st-export').onclick = () => {
     const blob = new Blob([store.exportJson()], { type: 'application/json' });
     const a = document.createElement('a');
